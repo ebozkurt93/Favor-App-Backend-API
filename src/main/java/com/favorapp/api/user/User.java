@@ -1,6 +1,8 @@
 package com.favorapp.api.user;
 
 import java.awt.image.BufferedImage;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import javax.persistence.Entity;
@@ -18,8 +20,10 @@ public class User {
 	private int id;
 	private String name;
 	private String lastName;
-	@JsonFormat(pattern="yyyy-MM-dd HH:mm a Z")
+	@JsonFormat(pattern="yyyy-MM-dd z")
 	private Date birthDate;
+	@JsonFormat(pattern="yyyy-MM-dd z")
+	private Date registerDate;
 	private String phoneNumber;
 	// profile pic
 	// private BufferedImage profilePic;
@@ -72,5 +76,15 @@ public class User {
 	public void setPhoneNumber(String phoneNumber) {
 		this.phoneNumber = phoneNumber;
 	}
+
+	public Date getRegisterDate() {
+		return registerDate;
+	}
+
+	public void setRegisterDate(Date registerDate) {
+		this.registerDate = registerDate;
+	}
+	
+	
 
 }

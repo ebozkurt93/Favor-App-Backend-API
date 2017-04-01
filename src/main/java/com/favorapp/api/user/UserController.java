@@ -1,5 +1,6 @@
 package com.favorapp.api.user;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -19,6 +20,8 @@ public class UserController {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/add")
 	public void addNewUser(@RequestBody User u ) {
+		Date date = new Date();
+		u.setRegisterDate(date);
 		userService.addUser(u);
 	}
 
@@ -32,14 +35,4 @@ public class UserController {
 	public User getUser(@PathVariable int id) {
 		return userService.getUser(id);
 	}
-
-	/*
-	 * @RequestMapping("/demo")
-	 * 
-	 * @ResponseBody public String demo() { //User u = new
-	 * User(name,lastName,birthDate,phoneNumber); User u = new User();
-	 * u.setName("name"); u.setLastName("lastName");
-	 * u.setBirthDate("birthDate"); u.setPhoneNumber("phoneNumber");
-	 * userRepository.save(u); return "Saved"; }
-	 */
 }
