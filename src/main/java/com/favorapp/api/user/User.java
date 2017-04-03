@@ -1,14 +1,14 @@
 package com.favorapp.api.user;
 
 import java.awt.image.BufferedImage;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -20,16 +20,19 @@ public class User {
 	private int id;
 	private String name;
 	private String lastName;
-	@JsonFormat(pattern="yyyy-MM-dd z")
+	@Temporal(TemporalType.DATE)
+	@JsonFormat(pattern="yyyy-MM-dd")
 	private Date birthDate;
-	@JsonFormat(pattern="yyyy-MM-dd z")
+	@Temporal(TemporalType.DATE)
+	@JsonFormat(pattern="yyyy-MM-dd")
 	private Date registerDate;
 	private String phoneNumber;
 	// profile pic
 	// private BufferedImage profilePic;
 	// private Image profilePic;
+	//password etc
 	/*
-	 * private Date registrationDate; private String address; private String
+	 * private String address; private String
 	 * email;
 	 */
 
