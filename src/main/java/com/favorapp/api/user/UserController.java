@@ -18,11 +18,20 @@ public class UserController {
 	private UserService userService;
 
 	@RequestMapping(method = RequestMethod.POST, value = "/add")
-	public void addNewUser(@RequestBody User u ) {
+	public void addNewUser(@RequestBody User u) {
+		// check if user exists, return error if it does
+
 		
-		Date date = new Date();
-		u.setRegisterDate(date);
-		userService.addUser(u);
+		
+		
+		
+		String email = u.getEmail();
+		if (userService.isValidEmailAddress(email)) {
+			Date date = new Date();
+			u.setRegisterDate(date);
+			userService.addUser(u);
+		} else
+			throw new IllegalArgumentException("The email address is not valid");
 	}
 
 	// TODO disable this for release
@@ -30,7 +39,7 @@ public class UserController {
 	public List<User> getAllUsers() {
 		return userService.getAllUsers();
 	}
-	
+
 	@RequestMapping(value = "/{id}")
 	public User getUser(@PathVariable int id) {
 		return userService.getUser(id);

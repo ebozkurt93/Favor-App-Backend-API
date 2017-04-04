@@ -17,8 +17,11 @@ public class NotRegisteredUser {
 	private int id;
 	private String name;
 	private String lastName;
+	private String email;
 	@Temporal(TemporalType.DATE)
 	@JsonFormat(pattern="yyyy-MM-dd")
 	private Date birthDate;
-
+	@Temporal(TemporalType.DATE)
+	@JsonFormat(pattern="yyyy-MM-dd")
+	private Date registerDate;
 }
