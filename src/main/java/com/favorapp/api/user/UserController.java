@@ -19,19 +19,19 @@ public class UserController {
 
 	@RequestMapping(method = RequestMethod.POST, value = "/add")
 	public void addNewUser(@RequestBody User u) {
-		// check if user exists, return error if it does
-
-		
-		
-		
-		
+		//check if email is valid
 		String email = u.getEmail();
-		if (userService.isValidEmailAddress(email)) {
+		if (!userService.isValidEmailAddress(email))
+		{
+			throw new IllegalArgumentException("The email address is not valid");
+		}
+		//check if email is used
+		else if(!userService.checkIfEmailUsed(email)) {
 			Date date = new Date();
 			u.setRegisterDate(date);
 			userService.addUser(u);
 		} else
-			throw new IllegalArgumentException("The email address is not valid");
+			throw new IllegalArgumentException("The email address is already in use");
 	}
 
 	// TODO disable this for release
