@@ -20,7 +20,6 @@ public class UserService {
 	}
 
 	public void addUser(User u) {
-
 		userRepository.save(u);
 	}
 
@@ -30,10 +29,10 @@ public class UserService {
 
 	public boolean checkIfEmailUsed(String email) {
 		User u = userRepository.findByEmail(email);
-		if (u != null){
+		if (u != null) {
 			return true;
-		}
-		else return false;
+		} else
+			return false;
 	}
 
 	public boolean isValidEmailAddress(String email) {
@@ -42,7 +41,7 @@ public class UserService {
 		java.util.regex.Matcher m = p.matcher(email);
 		return m.matches();
 	}
-	
+
 	public User findByEmail(String email) {
 		return userRepository.findByEmail(email);
 	}
