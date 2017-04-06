@@ -16,19 +16,19 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
 @RestController
-@RequestMapping(path = "/user")
+@RequestMapping(path = "/user/")
 public class UserController {
 
 	@Autowired
 	private UserService userService;
 
 	@RequestMapping(method = RequestMethod.POST, value = "/add")
-	public void addNewUser(@RequestBody User u) {
+	public void addNewUser(@RequestBody User u) throws ServletException {
 		//check if email is valid
 		String email = u.getEmail();
 		if (!userService.isValidEmailAddress(email))
 		{
-			throw new IllegalArgumentException("The email address is not valid");
+			throw new ServletException("The email address is not valid");
 		}
 		//check if email is used
 		else if(!userService.checkIfEmailUsed(email)) {
@@ -36,11 +36,11 @@ public class UserController {
 			u.setRegisterDate(date);
 			userService.addUser(u);
 		} else
-			throw new IllegalArgumentException("The email address is already in use");
+			throw new ServletException("The email address is already in use");
 	}
 
 	// TODO disable this for release
-	@RequestMapping(value = "/all")
+	@RequestMapping(value = "/secure/all")
 	public List<User> getAllUsers() {
 		return userService.getAllUsers();
 	}
