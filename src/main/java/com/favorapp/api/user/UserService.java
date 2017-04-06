@@ -42,4 +42,8 @@ public class UserService {
 		java.util.regex.Matcher m = p.matcher(email);
 		return m.matches();
 	}
+	
+	public User findByEmail(String email) {
+		return userRepository.findByEmail(email);
+	}
 }
