@@ -93,7 +93,6 @@ public class UserController {
 		Date endDate = new Date(t + (30 * 60000));
 		jwtToken = Jwts.builder().setSubject(email).claim("roles", user.getRole()).setIssuedAt(new Date())
 				.setExpiration(endDate).signWith(SignatureAlgorithm.HS256, "secretkey").compact();
-		System.out.println(jwtToken);
 		return jwtToken;
 
 	}
