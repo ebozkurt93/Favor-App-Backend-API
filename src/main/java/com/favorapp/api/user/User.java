@@ -1,22 +1,19 @@
 package com.favorapp.api.user;
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.Date;
+import java.util.EnumSet;
 
 import javax.persistence.Column;
+import javax.persistence.ElementCollection;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.UniqueConstraint;
-import javax.validation.constraints.NotNull;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -43,6 +40,7 @@ public class User {
 	@Column(nullable = false)
 	private String password;
 	
+	//@ElementCollection(targetClass = Role.class)
 	@Column(name = "role", nullable = false)
     @Enumerated(EnumType.STRING)
     private Role role;
@@ -124,6 +122,8 @@ public class User {
 	public void setRole(Role role) {
 		this.role = role;
 	}
+
+
 
 	
 	

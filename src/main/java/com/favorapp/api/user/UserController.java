@@ -7,13 +7,18 @@ import java.util.List;
 import javax.servlet.ServletException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.favorapp.api.config.JwtMyHelper;
+
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -35,6 +40,7 @@ public class UserController {
 		else if (!userService.checkIfEmailUsed(email)) {
 			Date date = new Date();
 			u.setRegisterDate(date);
+			//u.getRoles().add(Role.USER);
 			u.setRole(Role.USER);
 			userService.addUser(u);
 		} else
@@ -42,10 +48,15 @@ public class UserController {
 	}
 
 	// TODO disable this for release
-	@PreAuthorize("hasRole('user')")
+	//@PreAuthorize("getRole('ADMIN')")
 	@RequestMapping(value = "/secure/all")
-	public List<User> getAllUsers() {
-		return userService.getAllUsers();
+	public List<User> getAllUsers(@RequestHeader(value= "Authorization") String jwt) throws ServletException {
+		if(JwtMyHelper.getJWTAdmin(jwt)){
+			return userService.getAllUsers();
+		}
+		else{
+			throw new ServletException("You are not authorized to do that");
+		}
 	}
 
 	@RequestMapping(value = "/{id}")
@@ -80,8 +91,9 @@ public class UserController {
 		long t = date.getTimeInMillis();
 		// 30 min
 		Date endDate = new Date(t + (30 * 60000));
-		jwtToken = Jwts.builder().setSubject(email).claim("roles", "user").setIssuedAt(new Date())
+		jwtToken = Jwts.builder().setSubject(email).claim("roles", user.getRole()).setIssuedAt(new Date())
 				.setExpiration(endDate).signWith(SignatureAlgorithm.HS256, "secretkey").compact();
+		System.out.println(jwtToken);
 		return jwtToken;
 
 	}
