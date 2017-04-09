@@ -1,13 +1,14 @@
 package com.favorapp.api.user;
 
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
 import javax.servlet.ServletException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
+//import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.favorapp.api.config.JwtMyHelper;
+import com.favorapp.api.config.key.KeyFactory;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -53,7 +55,7 @@ public class UserController {
 		}
 	}
 
-	@RequestMapping(value = "/secure/getbyid/")
+	@RequestMapping(method = RequestMethod.POST, value = "/secure/getbyid/")
 	public User getUserById(@RequestBody User u, @RequestHeader(value = "Authorization") String jwt) throws ServletException {
 		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
 			int id = u.getId();
@@ -97,14 +99,32 @@ public class UserController {
 		if (!password.equals(pwd)) {
 			throw new ServletException("Invalid login. Please check your email and password.");
 		}
+		System.out.println(userService.getUserByEmail(email).getRoles().toString());
+		if(userService.getUserByEmail(email).getRoles().contains(Role.BLOCKED)){
+			throw new ServletException("Blocked account.");
+		}
 
 		Calendar date = Calendar.getInstance();
 		long t = date.getTimeInMillis();
 		// 30 min
 		Date endDate = new Date(t + (30 * 60000));
 		jwtToken = Jwts.builder().setSubject(email).claim("roles", user.getRoles()).setIssuedAt(new Date())
-				.setExpiration(endDate).signWith(SignatureAlgorithm.HS256, "secretkey").compact();
+				.setExpiration(endDate).signWith(SignatureAlgorithm.HS256, KeyFactory.jwtKey).compact();
 		return jwtToken;
+
+	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/secure/blockbyid/")
+	public void blockUserbyId(@RequestBody User u, @RequestHeader(value = "Authorization") String jwt) throws ServletException {
+		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
+			int id = u.getId();
+			User user = userService.getUserById(id);
+			Collection<Role> roles = user.getRoles();
+			roles.add(Role.BLOCKED);
+			user.setRoles(roles);
+		} else {
+			throw new ServletException("You are not authorized to do that");
+		}
 
 	}
 }
