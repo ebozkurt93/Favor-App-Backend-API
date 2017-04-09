@@ -23,7 +23,7 @@ public class UserService {
 		userRepository.save(u);
 	}
 
-	public User getUser(int id) {
+	public User getUserById(int id) {
 		return userRepository.findById(id);
 	}
 
@@ -42,7 +42,8 @@ public class UserService {
 		return m.matches();
 	}
 
-	public User findByEmail(String email) {
+	public User getUserByEmail(String email) {
 		return userRepository.findByEmail(email);
 	}
+
 }

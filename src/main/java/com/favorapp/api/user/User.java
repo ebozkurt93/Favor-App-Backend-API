@@ -1,6 +1,8 @@
 package com.favorapp.api.user;
 
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.EnumSet;
 
@@ -12,6 +14,10 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
@@ -40,10 +46,11 @@ public class User {
 	@Column(nullable = false)
 	private String password;
 	
-	//@ElementCollection(targetClass = Role.class)
-	@Column(name = "role", nullable = false)
+	@ElementCollection(targetClass = Role.class)
+	@JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
+	@Column(name = "roles", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Collection<Role> roles;
 	
 	//private String phoneNumber;
 	// profile pic
@@ -114,15 +121,19 @@ public class User {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-
-	public Role getRole() {
-		return role;
+	
+	public Collection<Role> getRoles() {
+		if (roles == null){
+			roles = new ArrayList<Role>();
+		}
+		return roles;
+	}
+	
+	public void setRoles(Collection<Role> roles) {
+		this.roles = roles;
 	}
 
-	public void setRole(Role role) {
-		this.role = role;
-	}
-
+	
 
 
 	

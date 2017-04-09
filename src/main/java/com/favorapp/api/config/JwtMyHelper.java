@@ -1,24 +1,40 @@
 package com.favorapp.api.config;
 
-import com.favorapp.api.user.Role;
+import java.util.ArrayList;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
 public class JwtMyHelper {
-
-	public static boolean getJWTUser(String jwt) {
-
+	
+	public static ArrayList<String> getJWTRoles(String jwt) {
 		jwt = jwt.replace("Bearer ", "");
 		Claims claims = Jwts.parser().setSigningKey("secretkey").parseClaimsJws(jwt).getBody();
-		Role role = (Role) claims.get("roles");
-		if (role.toString().equals("USER")) {
+		ArrayList<String> roles = (ArrayList<String>) claims.get("roles");
+		return roles;
+		//String roles = (String) claims.get("roles");
+		//return (ArrayList<String>) Arrays.asList(roles.split(","));
+	}
+
+	public static boolean getIfJWTUser(String jwt) {
+		ArrayList<String> roleList = getJWTRoles(jwt);
+		if (roleList.contains("USER")) {
 			return true;
 		} else {
 			return false;
 		}
 	}
 	
+	public static boolean getIfJWTAdmin(String jwt) {
+		ArrayList<String> roleList = getJWTRoles(jwt);
+		if (roleList.contains("ADMIN")) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	/*
 	public static boolean getJWTAdmin(String jwt) {
 
 		jwt = jwt.replace("Bearer ", "");
@@ -30,5 +46,5 @@ public class JwtMyHelper {
 			return false;
 		}
 	}
-
+*/
 }

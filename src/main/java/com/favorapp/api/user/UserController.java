@@ -7,8 +7,6 @@ import java.util.List;
 import javax.servlet.ServletException;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpRequest;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -18,7 +16,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.favorapp.api.config.JwtMyHelper;
 
-import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -40,28 +37,40 @@ public class UserController {
 		else if (!userService.checkIfEmailUsed(email)) {
 			Date date = new Date();
 			u.setRegisterDate(date);
-			//u.getRoles().add(Role.USER);
-			u.setRole(Role.USER);
+			u.getRoles().add(Role.USER);
+			// u.setRole(Role.USER);
 			userService.addUser(u);
 		} else
 			throw new ServletException("The email address is already in use");
 	}
 
-	// TODO disable this for release
-	//@PreAuthorize("getRole('ADMIN')")
 	@RequestMapping(value = "/secure/all")
-	public List<User> getAllUsers(@RequestHeader(value= "Authorization") String jwt) throws ServletException {
-		if(JwtMyHelper.getJWTAdmin(jwt)){
+	public List<User> getAllUsers(@RequestHeader(value = "Authorization") String jwt) throws ServletException {
+		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
 			return userService.getAllUsers();
-		}
-		else{
+		} else {
 			throw new ServletException("You are not authorized to do that");
 		}
 	}
 
-	@RequestMapping(value = "/{id}")
-	public User getUser(@PathVariable int id) {
-		return userService.getUser(id);
+	@RequestMapping(value = "/secure/getbyid/{id}")
+	public User getUserById(@PathVariable int id, @RequestHeader(value = "Authorization") String jwt) throws ServletException {
+		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
+			return userService.getUserById(id);
+		} else {
+			throw new ServletException("You are not authorized to do that");
+		}
+
+	}
+	//change this to post or something else and use a json, since you cannot send email with the link
+	@RequestMapping(value = "/secure/getbyemail/{email}")
+	public User getUserByEmail(@PathVariable String email, @RequestHeader(value = "Authorization") String jwt) throws ServletException {
+		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
+			return userService.getUserByEmail(email);
+		} else {
+			throw new ServletException("You are not authorized to do that");
+		}
+
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/login")
@@ -75,7 +84,7 @@ public class UserController {
 		String email = login.getEmail();
 		String password = login.getPassword();
 
-		User user = userService.findByEmail(email);
+		User user = userService.getUserByEmail(email);
 
 		if (user == null) {
 			throw new ServletException("User email not found.");
@@ -91,7 +100,7 @@ public class UserController {
 		long t = date.getTimeInMillis();
 		// 30 min
 		Date endDate = new Date(t + (30 * 60000));
-		jwtToken = Jwts.builder().setSubject(email).claim("roles", user.getRole()).setIssuedAt(new Date())
+		jwtToken = Jwts.builder().setSubject(email).claim("roles", user.getRoles()).setIssuedAt(new Date())
 				.setExpiration(endDate).signWith(SignatureAlgorithm.HS256, "secretkey").compact();
 		return jwtToken;
 
