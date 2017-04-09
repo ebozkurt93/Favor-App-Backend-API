@@ -53,19 +53,21 @@ public class UserController {
 		}
 	}
 
-	@RequestMapping(value = "/secure/getbyid/{id}")
-	public User getUserById(@PathVariable int id, @RequestHeader(value = "Authorization") String jwt) throws ServletException {
+	@RequestMapping(value = "/secure/getbyid/")
+	public User getUserById(@RequestBody User u, @RequestHeader(value = "Authorization") String jwt) throws ServletException {
 		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
+			int id = u.getId();
 			return userService.getUserById(id);
 		} else {
 			throw new ServletException("You are not authorized to do that");
 		}
 
 	}
-	//change this to post or something else and use a json, since you cannot send email with the link
-	@RequestMapping(value = "/secure/getbyemail/{email}")
-	public User getUserByEmail(@PathVariable String email, @RequestHeader(value = "Authorization") String jwt) throws ServletException {
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/secure/getbyemail/")
+	public User getUserByEmail(@RequestBody User u, @RequestHeader(value = "Authorization") String jwt) throws ServletException {
 		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
+			String email = u.getEmail();
 			return userService.getUserByEmail(email);
 		} else {
 			throw new ServletException("You are not authorized to do that");
