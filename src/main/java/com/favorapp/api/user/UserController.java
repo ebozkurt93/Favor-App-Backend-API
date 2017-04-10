@@ -40,7 +40,16 @@ public class UserController {
 			Date date = new Date();
 			u.setRegisterDate(date);
 			u.getRoles().add(Role.USER);
-			// u.setRole(Role.USER);
+			//send email to user, generate random key for him (hash code of his email)
+			//
+			/*
+		
+			int hash = email.hashCode();
+			String msg = String.valueOf(hash);
+			emailSender.sendMail("Favor", "favorapp2017@gmail.com", "Favor Registration", msg);
+			*/
+			
+			//
 			userService.addUser(u);
 		} else
 			throw new ServletException("The email address is already in use");
@@ -121,6 +130,21 @@ public class UserController {
 			User user = userService.getUserById(id);
 			Collection<Role> roles = user.getRoles();
 			roles.add(Role.BLOCKED);
+			user.setRoles(roles);
+			userService.addUser(user);
+		} else {
+			throw new ServletException("You are not authorized to do that");
+		}
+
+	}
+	
+	@RequestMapping(method = RequestMethod.POST, value = "/secure/unblockbyid/")
+	public void unblockUserbyId(@RequestBody User u, @RequestHeader(value = "Authorization") String jwt) throws ServletException {
+		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
+			int id = u.getId();
+			User user = userService.getUserById(id);
+			Collection<Role> roles = user.getRoles();
+			roles.remove(Role.BLOCKED);
 			user.setRoles(roles);
 			userService.addUser(user);
 		} else {
