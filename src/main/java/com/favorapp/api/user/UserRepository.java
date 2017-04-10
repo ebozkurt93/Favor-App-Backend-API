@@ -1,5 +1,7 @@
 package com.favorapp.api.user;
 
+import java.util.Collection;
+
 import org.springframework.data.repository.CrudRepository;
 
 //This will be AUTO IMPLEMENTED by Spring into a Bean called userRepository
@@ -10,6 +12,7 @@ public interface UserRepository extends CrudRepository<User, Long> {
 	User findById(int id);
 
 	User findByEmail(String email);
+
 
 
 

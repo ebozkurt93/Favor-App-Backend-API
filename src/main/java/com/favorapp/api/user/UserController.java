@@ -122,6 +122,7 @@ public class UserController {
 			Collection<Role> roles = user.getRoles();
 			roles.add(Role.BLOCKED);
 			user.setRoles(roles);
+			userService.addUser(user);
 		} else {
 			throw new ServletException("You are not authorized to do that");
 		}
