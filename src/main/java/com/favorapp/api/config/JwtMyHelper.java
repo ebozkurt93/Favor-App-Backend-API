@@ -7,15 +7,15 @@ import com.favorapp.api.config.key.KeyFactory;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
+
 public class JwtMyHelper {
+
 	
 	public static ArrayList<String> getJWTRoles(String jwt) {
 		jwt = jwt.replace("Bearer ", "");
 		Claims claims = Jwts.parser().setSigningKey(KeyFactory.jwtKey).parseClaimsJws(jwt).getBody();
 		ArrayList<String> roles = (ArrayList<String>) claims.get("roles");
 		return roles;
-		//String roles = (String) claims.get("roles");
-		//return (ArrayList<String>) Arrays.asList(roles.split(","));
 	}
 
 	public static boolean getIfJWTUser(String jwt) {

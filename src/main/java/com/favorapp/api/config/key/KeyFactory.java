@@ -4,6 +4,7 @@ import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.security.KeyPairGenerator;
 import java.security.SecureRandom;
+import java.util.HashMap;
 import java.util.Random;
 
 import javax.annotation.PostConstruct;
@@ -14,10 +15,12 @@ import org.springframework.stereotype.Component;
 public class KeyFactory {
 
 	public static String jwtKey;
+	public static HashMap<Integer, String> tokenMap;
 
 	@PostConstruct
 	public void init() throws Exception {
 		generateKey();
+		tokenMap = new HashMap<Integer, String>();
 	}
 
 	public void generateKey() throws Exception {
