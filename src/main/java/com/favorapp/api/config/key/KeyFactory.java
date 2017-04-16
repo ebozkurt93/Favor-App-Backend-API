@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.Random;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.ServletException;
 
 import org.springframework.stereotype.Component;
 
@@ -27,8 +28,24 @@ public class KeyFactory {
 	
 		SecureRandom random = new SecureRandom();
 		jwtKey = new BigInteger(130, random).toString(32);
+		//jwtKey = "secretkey";
 		//TODO disable this before release
 		System.out.println("JWT KEY: " + jwtKey + "\n\n\n");
+	}
+	
+	public static boolean checkKeyValidity(String jwt) {
+		jwt = jwt.substring(7);
+		if(tokenMap.containsValue(jwt)) {
+			return true;
+		} else {
+			try {//TODO find a solution for this null pointer issue related to here
+				throw new ServletException("This key is not valid anymore");
+			} catch (ServletException e) {
+				return false;
+			}
+		}
+		
+		
 	}
 
 }

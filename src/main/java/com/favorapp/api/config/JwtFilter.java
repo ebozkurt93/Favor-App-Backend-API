@@ -2,6 +2,7 @@ package com.favorapp.api.config;
 
 import java.io.IOException;
 
+import javax.annotation.Resource;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -10,6 +11,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
+import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.filter.GenericFilterBean;
 
 import com.favorapp.api.config.key.KeyFactory;
@@ -19,10 +24,11 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureException;
 
+
 public class JwtFilter extends GenericFilterBean {
 
-	@Autowired
-	private UserService userService;
+	//@Autowired
+	//private UserService userService;
 
 	public void doFilter(final ServletRequest req, final ServletResponse res, final FilterChain chain)
 			throws IOException, ServletException {
@@ -52,11 +58,11 @@ public class JwtFilter extends GenericFilterBean {
 				String email = (String) claims.getSubject();
 				System.out.println(email);
 				int id = userService.getUserByEmail(email).getId();
-				System.out.println("id: " + id);
+				//System.out.println("id: " + id);
 				String key = KeyFactory.tokenMap.get(id);
 				System.out.println(authHeader);
 				System.out.println(key);
-				if (!authHeader.equals(key)) {
+				if (!authHeader.equals("Bearer " + key)) {
 					throw new ServletException("No such token exists");
 				}
 */

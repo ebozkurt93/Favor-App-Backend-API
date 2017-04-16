@@ -60,7 +60,7 @@ public class UserController {
 
 	@RequestMapping(value = "/secure/all")
 	public List<User> getAllUsers(@RequestHeader(value = "Authorization") String jwt) throws ServletException {
-		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
+		if (JwtMyHelper.getIfJWTAdmin(jwt) && KeyFactory.checkKeyValidity(jwt)) {
 			return userService.getAllUsers();
 		} else {
 			throw new ServletException("You are not authorized to do that");
