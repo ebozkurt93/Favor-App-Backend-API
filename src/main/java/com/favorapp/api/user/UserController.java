@@ -151,6 +151,7 @@ public class UserController {
 			roles.add(Role.BLOCKED);
 			user.setRoles(roles);
 			userService.addUser(user);
+			KeyFactory.tokenMap.remove(user.getId());
 		} else {
 			throw new ServletException("You are not authorized to do that");
 		}
@@ -170,6 +171,7 @@ public class UserController {
 			roles.remove(Role.BLOCKED);
 			user.setRoles(roles);
 			userService.addUser(user);
+			KeyFactory.tokenMap.remove(user.getId());
 		} else {
 			throw new ServletException("You are not authorized to do that");
 		}
