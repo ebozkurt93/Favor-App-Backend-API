@@ -17,7 +17,7 @@ public class DemoController {
 	
 	@Autowired
 	private UserService userService;
-	
+	/*
 	@RequestMapping(value = "/secure/all")
 	public List<User> getAllUsers(@RequestHeader(value = "Authorization") String jwt) throws ServletException {
 		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
@@ -26,5 +26,5 @@ public class DemoController {
 			throw new ServletException("You are not authorized to do that");
 		}
 	}
-
+*/
 }

@@ -27,8 +27,8 @@ public class KeyFactory {
 	public void generateKey() throws Exception {
 	
 		SecureRandom random = new SecureRandom();
-		jwtKey = new BigInteger(130, random).toString(32);
-		//jwtKey = "secretkey";
+		//jwtKey = new BigInteger(130, random).toString(32);
+		jwtKey = "secretkey";
 		//TODO disable this before release
 		System.out.println("JWT KEY: " + jwtKey + "\n\n\n");
 	}
