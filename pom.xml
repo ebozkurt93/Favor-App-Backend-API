@@ -6,7 +6,7 @@
 	<groupId>com.favorapp</groupId>
 	<artifactId>favorapp-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>jar</packaging>
+	<packaging>war</packaging>
 
 	<name>favorapp-api</name>
 	<description>Favorapp Backend API</description>
@@ -69,6 +69,21 @@
 		</dependency>
 
 
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<!-- For email -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-mail</artifactId>
+		</dependency>
 
 	</dependencies>
 

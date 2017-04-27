@@ -9,6 +9,8 @@ import java.util.List;
 import javax.servlet.ServletException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.MailException;
+import org.springframework.mail.MailSender;
 //import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.favorapp.api.config.JwtMyHelper;
+import com.favorapp.api.config.MailSenderService;
 import com.favorapp.api.config.key.KeyFactory;
 
 import io.jsonwebtoken.Jwts;
@@ -28,6 +31,24 @@ public class UserController {
 
 	@Autowired
 	private UserService userService;
+
+	@Autowired
+	private MailSenderService mailSenderService;
+
+	@RequestMapping(method = RequestMethod.GET, value = "/hello")
+	public String hello() {
+		return "Working";
+
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/emaildemo")
+	public void emailDemo() throws MailException, InterruptedException {
+		User user = new User();
+		user.setEmail("favorapp2017@gmail.com");
+
+		mailSenderService.sendEmail(user);
+
+	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/add")
 	public void addNewUser(@RequestBody User u) throws ServletException {
@@ -41,9 +62,7 @@ public class UserController {
 			Date date = new Date();
 			u.setRegisterDate(date);
 			u.getRoles().add(Role.USER);
-			// send email to user, generate random key for him (hash code of his
-			// email)
-			//
+
 			/*
 			 * 
 			 * int hash = email.hashCode(); String msg = String.valueOf(hash);
@@ -53,6 +72,21 @@ public class UserController {
 
 			//
 			userService.addUser(u);
+
+			
+			int hash = email.hashCode();
+			String emailLink = String.valueOf(hash);
+			String finalLink = "http://localhost:8080/user/?validate_user"; //continue from here
+			String emailaddress = "favorapp2017@gmail.com";
+			String subject = "Welcome to Boon";
+			String text = "link is " + finalLink;
+			try {
+				mailSenderService.sendEmailWithDetails(emailaddress, subject, text);
+			} catch (MailException | InterruptedException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+
 		} else
 			throw new ServletException("The email address is already in use");
 	}
@@ -178,8 +212,7 @@ public class UserController {
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/secure/resetalltokens/")
-	public void resetAllTokens(@RequestHeader(value = "Authorization") String jwt)
-			throws ServletException {
+	public void resetAllTokens(@RequestHeader(value = "Authorization") String jwt) throws ServletException {
 		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
 			KeyFactory.tokenMap = new HashMap<Integer, String>();
 		} else {
@@ -187,7 +220,7 @@ public class UserController {
 		}
 
 	}
-	
+
 	@RequestMapping(method = RequestMethod.POST, value = "/secure/resettokenforid/")
 	public void resetTokenbyId(@RequestBody User u, @RequestHeader(value = "Authorization") String jwt)
 			throws ServletException {
