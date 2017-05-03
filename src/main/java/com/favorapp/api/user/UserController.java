@@ -1,5 +1,8 @@
 package com.favorapp.api.user;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
@@ -11,6 +14,7 @@ import javax.servlet.ServletException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
+import org.springframework.web.bind.annotation.PathVariable;
 //import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -22,6 +26,7 @@ import com.favorapp.api.config.JwtMyHelper;
 import com.favorapp.api.config.MailSenderService;
 import com.favorapp.api.config.key.KeyFactory;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 
@@ -37,7 +42,7 @@ public class UserController {
 
 	@RequestMapping(method = RequestMethod.GET, value = "/hello")
 	public String hello() {
-		return "Working";
+		return "Hi";
 
 	}
 
@@ -45,12 +50,33 @@ public class UserController {
 	public void emailDemo() throws MailException, InterruptedException {
 		User user = new User();
 		user.setEmail("favorapp2017@gmail.com");
-
+		
 		mailSenderService.sendEmail(user);
 
 	}
+	
+	@RequestMapping(method = RequestMethod.GET, value ="/email_validation/{p1}/{p2}/{p3}")
+	public void validateEmail(@PathVariable String p1, @PathVariable String p2, @PathVariable String p3) throws ServletException {
+		
+		String token = p1 +"." + p2 + "." + p3;
+		System.out.println(token);
+		Claims claims = Jwts.parser().setSigningKey(KeyFactory.jwtKey).parseClaimsJws(token).getBody();
+		System.out.println(claims);
+		
+		String email = (String) claims.get("email_validation");
+		User user =userService.getUserByEmail(email);
+		Collection<Role> roles = user.getRoles();
+		if (!roles.contains(Role.VALIDATE_EMAIL)) {
+			throw new ServletException("This account is already validated.");
+		}
+		roles.remove(Role.VALIDATE_EMAIL);
 
-	@RequestMapping(method = RequestMethod.POST, value = "/add")
+		user.setRoles(roles);
+		userService.addUser(user);
+		
+	}
+
+	@RequestMapping(method = RequestMethod.POST, value = "/register")
 	public void addNewUser(@RequestBody User u) throws ServletException {
 		// check if email is valid
 		String email = u.getEmail();
@@ -62,31 +88,37 @@ public class UserController {
 			Date date = new Date();
 			u.setRegisterDate(date);
 			u.getRoles().add(Role.USER);
-
-			/*
-			 * 
-			 * int hash = email.hashCode(); String msg = String.valueOf(hash);
-			 * emailSender.sendMail("Favor", "favorapp2017@gmail.com",
-			 * "Favor Registration", msg);
-			 */
-
-			//
+			u.getRoles().add(Role.VALIDATE_EMAIL);
+			
 			userService.addUser(u);
 
+			//get email validation token
+			Calendar dateNow = Calendar.getInstance();
+			long t = dateNow.getTimeInMillis();
+			// 1 day
+			Date endDate = new Date(t + (1 * 60 * 60000));
+			String jwtToken = Jwts.builder().claim("email_validation", email).setIssuedAt(new Date())
+					.setExpiration(endDate).signWith(SignatureAlgorithm.HS256, KeyFactory.jwtKey).compact();
+			System.out.println(jwtToken);
+			//send email to token
 			
+			String[] tokenParts = jwtToken.split("\\.");
+			System.out.println(tokenParts.length);
 			int hash = email.hashCode();
-			String emailLink = String.valueOf(hash);
-			String finalLink = "http://localhost:8080/user/?validate_user"; //continue from here
+			String finalLink = "http://localhost:8080/user/email_validation/" + tokenParts[0] + "/" + tokenParts[1] + "/" + tokenParts[2]; //continue from here
 			String emailaddress = "favorapp2017@gmail.com";
 			String subject = "Welcome to Boon";
 			String text = "link is " + finalLink;
+			System.out.println(text);
+			
+			/* TODO enable this to send emails
 			try {
 				mailSenderService.sendEmailWithDetails(emailaddress, subject, text);
 			} catch (MailException | InterruptedException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-
+*/
 		} else
 			throw new ServletException("The email address is already in use");
 	}
@@ -157,6 +189,10 @@ public class UserController {
 
 		if (userService.getUserByEmail(email).getRoles().contains(Role.BLOCKED)) {
 			throw new ServletException("Blocked account.");
+		}
+		
+		if (userService.getUserByEmail(email).getRoles().contains(Role.VALIDATE_EMAIL)) {
+			throw new ServletException("Please validate your email address.");
 		}
 
 		Calendar date = Calendar.getInstance();
