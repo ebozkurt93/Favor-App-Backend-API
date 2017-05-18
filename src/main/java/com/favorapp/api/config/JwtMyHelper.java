@@ -14,7 +14,7 @@ public class JwtMyHelper {
 		if (KeyFactory.checkKeyValidity(jwt)) {
 			jwt = jwt.replace("Bearer ", "");
 			Claims claims = Jwts.parser().setSigningKey(KeyFactory.jwtKey).parseClaimsJws(jwt).getBody();
-			
+			@SuppressWarnings(value = {"unchecked" })
 			ArrayList<String> roles = (ArrayList<String>) claims.get("roles");
 			return roles;
 			/*

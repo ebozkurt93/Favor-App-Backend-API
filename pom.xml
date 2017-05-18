@@ -6,7 +6,7 @@
 	<groupId>com.favorapp</groupId>
 	<artifactId>favorapp-api</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 
 	<name>favorapp-api</name>
 	<description>Favorapp Backend API</description>
@@ -69,16 +69,6 @@
 		</dependency>
 
 
-
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-mail</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-		</dependency>
-
 		<!-- For email -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -89,6 +79,27 @@
 
 	<build>
 		<plugins>
+		
+		<!-- Docker maven -->
+		<plugin>
+            <groupId>com.spotify</groupId>
+            <artifactId>docker-maven-plugin</artifactId>
+            <version>0.4.11</version>
+            <configuration>
+                <imageName>ebozkurt/favor</imageName>
+                <dockerDirectory>src/main/docker</dockerDirectory>
+                	<dockerHost>https://192.168.99.100:2376</dockerHost>
+                <resources>
+                    <resource>
+                        <targetPath>/</targetPath>
+                        <directory>${project.build.directory}</directory>
+                        <include>${project.build.finalName}.jar</include>
+                    </resource>
+                </resources>
+            </configuration>
+        </plugin>
+		
+		
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
