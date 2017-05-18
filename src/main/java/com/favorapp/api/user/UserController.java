@@ -88,7 +88,8 @@ public class UserController {
 			Date date = new Date();
 			u.setRegisterDate(date);
 			u.getRoles().add(Role.USER);
-			u.getRoles().add(Role.VALIDATE_EMAIL);
+			//TODO enable this later
+			//u.getRoles().add(Role.VALIDATE_EMAIL);
 			
 			userService.addUser(u);
 
