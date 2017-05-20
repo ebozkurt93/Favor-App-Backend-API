@@ -50,21 +50,22 @@ public class UserController {
 	public void emailDemo() throws MailException, InterruptedException {
 		User user = new User();
 		user.setEmail("favorapp2017@gmail.com");
-		
+
 		mailSenderService.sendEmail(user);
 
 	}
-	
-	@RequestMapping(method = RequestMethod.GET, value ="/email_validation/{p1}/{p2}/{p3}")
-	public void validateEmail(@PathVariable String p1, @PathVariable String p2, @PathVariable String p3) throws ServletException {
-		
-		String token = p1 +"." + p2 + "." + p3;
+
+	@RequestMapping(method = RequestMethod.GET, value = "/email_validation/{p1}/{p2}/{p3}")
+	public void validateEmail(@PathVariable String p1, @PathVariable String p2, @PathVariable String p3)
+			throws ServletException {
+
+		String token = p1 + "." + p2 + "." + p3;
 		System.out.println(token);
 		Claims claims = Jwts.parser().setSigningKey(KeyFactory.jwtKey).parseClaimsJws(token).getBody();
 		System.out.println(claims);
-		
+
 		String email = (String) claims.get("email_validation");
-		User user =userService.getUserByEmail(email);
+		User user = userService.getUserByEmail(email);
 		Collection<Role> roles = user.getRoles();
 		if (!roles.contains(Role.VALIDATE_EMAIL)) {
 			throw new ServletException("This account is already validated.");
@@ -73,7 +74,7 @@ public class UserController {
 
 		user.setRoles(roles);
 		userService.addUser(user);
-		
+
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/register")
@@ -88,12 +89,12 @@ public class UserController {
 			Date date = new Date();
 			u.setRegisterDate(date);
 			u.getRoles().add(Role.USER);
-			//TODO enable this later
-			//u.getRoles().add(Role.VALIDATE_EMAIL);
-			
+			// TODO enable this later
+			// u.getRoles().add(Role.VALIDATE_EMAIL);
+
 			userService.addUser(u);
 
-			//get email validation token
+			// get email validation token
 			Calendar dateNow = Calendar.getInstance();
 			long t = dateNow.getTimeInMillis();
 			// 1 day
@@ -101,25 +102,24 @@ public class UserController {
 			String jwtToken = Jwts.builder().claim("email_validation", email).setIssuedAt(new Date())
 					.setExpiration(endDate).signWith(SignatureAlgorithm.HS256, KeyFactory.jwtKey).compact();
 			System.out.println(jwtToken);
-			//send email to token
-			
+			// send email to token
+
 			String[] tokenParts = jwtToken.split("\\.");
 			System.out.println(tokenParts.length);
 			int hash = email.hashCode();
-			String finalLink = "http://localhost:8080/user/email_validation/" + tokenParts[0] + "/" + tokenParts[1] + "/" + tokenParts[2]; //continue from here
+			String finalLink = "http://localhost:8080/user/email_validation/" + tokenParts[0] + "/" + tokenParts[1]
+					+ "/" + tokenParts[2]; // continue from here
 			String emailaddress = "favorapp2017@gmail.com";
 			String subject = "Welcome to Boon";
 			String text = "link is " + finalLink;
 			System.out.println(text);
-			
-			/* TODO enable this to send emails
-			try {
-				mailSenderService.sendEmailWithDetails(emailaddress, subject, text);
-			} catch (MailException | InterruptedException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-*/
+
+			/*
+			 * TODO enable this to send emails try {
+			 * mailSenderService.sendEmailWithDetails(emailaddress, subject,
+			 * text); } catch (MailException | InterruptedException e1) { //
+			 * TODO Auto-generated catch block e1.printStackTrace(); }
+			 */
 		} else
 			throw new ServletException("The email address is already in use");
 	}
@@ -191,7 +191,7 @@ public class UserController {
 		if (userService.getUserByEmail(email).getRoles().contains(Role.BLOCKED)) {
 			throw new ServletException("Blocked account.");
 		}
-		
+
 		if (userService.getUserByEmail(email).getRoles().contains(Role.VALIDATE_EMAIL)) {
 			throw new ServletException("Please validate your email address.");
 		}
@@ -248,7 +248,7 @@ public class UserController {
 
 	}
 
-	@RequestMapping(method = RequestMethod.POST, value = "/secure/resetalltokens/")
+	@RequestMapping(method = RequestMethod.GET, value = "/secure/resetalltokens/")
 	public void resetAllTokens(@RequestHeader(value = "Authorization") String jwt) throws ServletException {
 		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
 			KeyFactory.tokenMap = new HashMap<Integer, String>();
@@ -270,6 +270,23 @@ public class UserController {
 			KeyFactory.tokenMap.remove(id);
 		} else {
 			throw new ServletException("You are not authorized to do that");
+		}
+
+	}
+
+	//TODO remove this
+	@RequestMapping(method = RequestMethod.POST, value = "/makeidadmin/")
+	public void makeidadmin(@RequestBody User u) throws ServletException {
+
+		int id = u.getId();
+		User user = userService.getUserById(id);
+		if (user == null) {
+			throw new ServletException("No user with that id");
+		} else {
+			Collection<Role> newRoles = user.getRoles();
+			newRoles.add(Role.ADMIN);
+		user.setRoles(newRoles);
+		userService.addUser(user);
 		}
 
 	}
