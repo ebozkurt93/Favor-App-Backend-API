@@ -10,7 +10,10 @@ import java.util.HashMap;
 import java.util.List;
 
 import javax.servlet.ServletException;
+import javax.validation.constraints.Null;
 
+import helper.JSONResponse;
+import helper.MessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
@@ -34,261 +37,255 @@ import io.jsonwebtoken.SignatureAlgorithm;
 @RequestMapping(path = "/user/")
 public class UserController {
 
-	@Autowired
-	private UserService userService;
+    @Autowired
+    private UserService userService;
 
-	@Autowired
-	private MailSenderService mailSenderService;
+    @Autowired
+    private MailSenderService mailSenderService;
 
-	@RequestMapping(method = RequestMethod.GET, value = "/hello")
-	public String hello() {
-		return "Hi";
+    @RequestMapping(method = RequestMethod.GET, value = "/hello")
+    public String hello() {
+        return "Hi";
 
-	}
+    }
 
-	@RequestMapping(method = RequestMethod.POST, value = "/emaildemo")
-	public void emailDemo() throws MailException, InterruptedException {
-		User user = new User();
-		user.setEmail("favorapp2017@gmail.com");
+    @RequestMapping(method = RequestMethod.POST, value = "/emaildemo")
+    public void emailDemo() throws MailException, InterruptedException {
+        User user = new User();
+        user.setEmail("favorapp2017@gmail.com");
 
-		mailSenderService.sendEmail(user);
+        mailSenderService.sendEmail(user);
 
-	}
+    }
 
-	@RequestMapping(method = RequestMethod.GET, value = "/email_validation/{p1}/{p2}/{p3}")
-	public void validateEmail(@PathVariable String p1, @PathVariable String p2, @PathVariable String p3)
-			throws ServletException {
+    @RequestMapping(method = RequestMethod.GET, value = "/email_validation/{p1}/{p2}/{p3}")
+    public JSONResponse validateEmail(@PathVariable String p1, @PathVariable String p2, @PathVariable String p3) {
 
-		String token = p1 + "." + p2 + "." + p3;
-		System.out.println(token);
-		Claims claims = Jwts.parser().setSigningKey(KeyFactory.jwtKey).parseClaimsJws(token).getBody();
-		System.out.println(claims);
+        String token = p1 + "." + p2 + "." + p3;
+        System.out.println(token);
+        Claims claims = Jwts.parser().setSigningKey(KeyFactory.jwtKey).parseClaimsJws(token).getBody();
+        System.out.println(claims);
 
-		String email = (String) claims.get("email_validation");
-		User user = userService.getUserByEmail(email);
-		Collection<Role> roles = user.getRoles();
-		if (!roles.contains(Role.VALIDATE_EMAIL)) {
-			throw new ServletException("This account is already validated.");
-		}
-		roles.remove(Role.VALIDATE_EMAIL);
+        String email = (String) claims.get("email_validation");
+        User user = userService.getUserByEmail(email);
+        Collection<Role> roles = user.getRoles();
+        if (!roles.contains(Role.VALIDATE_EMAIL)) {
+            return JSONResponse.errorDefault(MessageCode.already_validated_account);
+        }
+        roles.remove(Role.VALIDATE_EMAIL);
 
-		user.setRoles(roles);
-		userService.addUser(user);
+        user.setRoles(roles);
+        userService.addUser(user);
+        return JSONResponse.successNoPayloadDefault();
+    }
 
-	}
+    @RequestMapping(method = RequestMethod.POST, value = "/register")
+    public JSONResponse addNewUser(@RequestBody User u) {
+        // check if email is valid
+        String email = u.getEmail();
+        if (!userService.isValidEmailAddress(email)) {
+            return JSONResponse.errorDefault(MessageCode.not_valid_email);
+        }
+        // check if email is used
+        else if (!userService.checkIfEmailUsed(email)) {
+            Date date = new Date();
+            u.setRegisterDate(date);
+            u.getRoles().add(Role.USER);
+            // TODO enable this later
+            // u.getRoles().add(Role.VALIDATE_EMAIL);
 
-	@RequestMapping(method = RequestMethod.POST, value = "/register")
-	public void addNewUser(@RequestBody User u) throws ServletException {
-		// check if email is valid
-		String email = u.getEmail();
-		if (!userService.isValidEmailAddress(email)) {
-			throw new ServletException("The email address is not valid");
-		}
-		// check if email is used
-		else if (!userService.checkIfEmailUsed(email)) {
-			Date date = new Date();
-			u.setRegisterDate(date);
-			u.getRoles().add(Role.USER);
-			// TODO enable this later
-			// u.getRoles().add(Role.VALIDATE_EMAIL);
+            userService.addUser(u);
 
-			userService.addUser(u);
+            // get email validation token
+            Calendar dateNow = Calendar.getInstance();
+            long t = dateNow.getTimeInMillis();
+            // 1 day
+            Date endDate = new Date(t + (1 * 60 * 60000));
+            String jwtToken = Jwts.builder().claim("email_validation", email).setIssuedAt(new Date())
+                    .setExpiration(endDate).signWith(SignatureAlgorithm.HS256, KeyFactory.jwtKey).compact();
+            System.out.println(jwtToken);
+            // send email to token
 
-			// get email validation token
-			Calendar dateNow = Calendar.getInstance();
-			long t = dateNow.getTimeInMillis();
-			// 1 day
-			Date endDate = new Date(t + (1 * 60 * 60000));
-			String jwtToken = Jwts.builder().claim("email_validation", email).setIssuedAt(new Date())
-					.setExpiration(endDate).signWith(SignatureAlgorithm.HS256, KeyFactory.jwtKey).compact();
-			System.out.println(jwtToken);
-			// send email to token
-
-			String[] tokenParts = jwtToken.split("\\.");
-			System.out.println(tokenParts.length);
-			int hash = email.hashCode();
-			String finalLink = "http://localhost:8080/user/email_validation/" + tokenParts[0] + "/" + tokenParts[1]
-					+ "/" + tokenParts[2]; // continue from here
-			String emailaddress = "favorapp2017@gmail.com";
-			String subject = "Welcome to Boon";
-			String text = "link is " + finalLink;
-			System.out.println(text);
+            String[] tokenParts = jwtToken.split("\\.");
+            System.out.println(tokenParts.length);
+            int hash = email.hashCode();
+            String finalLink = "http://localhost:8080/user/email_validation/" + tokenParts[0] + "/" + tokenParts[1]
+                    + "/" + tokenParts[2]; // continue from here
+            String emailaddress = "favorapp2017@gmail.com";
+            String subject = "Welcome to Boon";
+            String text = "link is " + finalLink;
+            System.out.println(text);
+            return JSONResponse.successNoPayloadDefault();
 
 			/*
-			 * TODO enable this to send emails try {
+             * TODO enable this to send emails try {
 			 * mailSenderService.sendEmailWithDetails(emailaddress, subject,
 			 * text); } catch (MailException | InterruptedException e1) { //
 			 * TODO Auto-generated catch block e1.printStackTrace(); }
 			 */
-		} else
-			throw new ServletException("The email address is already in use");
-	}
+        } else
+            return JSONResponse.errorDefault(MessageCode.email_already_in_use);
+    }
 
-	@RequestMapping(value = "/secure/all")
-	public List<User> getAllUsers(@RequestHeader(value = "Authorization") String jwt) throws ServletException {
-		if (JwtMyHelper.getIfJWTAdmin(jwt) && KeyFactory.checkKeyValidity(jwt)) {
-			return userService.getAllUsers();
-		} else {
-			throw new ServletException("You are not authorized to do that");
-		}
-	}
+    @RequestMapping(value = "/secure/all")
+    public JSONResponse getAllUsers(@RequestHeader(value = "Authorization") String jwt) {
+        if (JwtMyHelper.getIfJWTAdmin(jwt) && KeyFactory.checkKeyValidity(jwt)) {
+            return new JSONResponse<List<User>>().successWithPayloadDefault(userService.getAllUsers());
+        } else {
+            return JSONResponse.errorDefault(MessageCode.not_authorized);
+        }
+    }
 
-	@RequestMapping(method = RequestMethod.POST, value = "/secure/getbyid/")
-	public User getUserById(@RequestBody User u, @RequestHeader(value = "Authorization") String jwt)
-			throws ServletException {
-		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
-			int id = u.getId();
-			User user = userService.getUserById(id);
-			if (user == null) {
-				throw new ServletException("No user with that id");
-			}
-			return user;
-		} else {
-			throw new ServletException("You are not authorized to do that");
-		}
+    @RequestMapping(method = RequestMethod.POST, value = "/secure/getbyid/")
+    public JSONResponse getUserById(@RequestBody User u, @RequestHeader(value = "Authorization") String jwt) {
+        if (JwtMyHelper.getIfJWTAdmin(jwt)) {
+            int id = u.getId();
+            User user = userService.getUserById(id);
+            if (user == null) {
+                return JSONResponse.errorDefault(MessageCode.no_user_with_id);
+            }
+            return new JSONResponse<User>().successWithPayloadDefault(user);
+        } else {
+            return JSONResponse.errorDefault(MessageCode.not_authorized);
+        }
 
-	}
+    }
 
-	@RequestMapping(method = RequestMethod.POST, value = "/secure/getbyemail/")
-	public User getUserByEmail(@RequestBody User u, @RequestHeader(value = "Authorization") String jwt)
-			throws ServletException {
-		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
-			String email = u.getEmail();
-			User user = userService.getUserByEmail(email);
-			if (user == null) {
-				throw new ServletException("No user with that email");
-			}
-			return user;
-		} else {
-			throw new ServletException("You are not authorized to do that");
-		}
+    @RequestMapping(method = RequestMethod.POST, value = "/secure/getbyemail/")
+    public JSONResponse getUserByEmail(@RequestBody User u, @RequestHeader(value = "Authorization") String jwt) {
+        if (JwtMyHelper.getIfJWTAdmin(jwt)) {
+            String email = u.getEmail();
+            User user = userService.getUserByEmail(email);
+            if (user == null) {
+                return JSONResponse.errorDefault(MessageCode.no_user_with_email);
+            }
+            return new JSONResponse<User>().successWithPayloadDefault(user);
+        } else {
+            return JSONResponse.errorDefault(MessageCode.not_authorized);
+        }
 
-	}
+    }
 
-	@RequestMapping(method = RequestMethod.POST, value = "/login")
-	public String login(@RequestBody User login) throws ServletException {
+    @RequestMapping(method = RequestMethod.POST, value = "/login")
+    public JSONResponse login(@RequestBody User login) {
 
-		String jwtToken = "";
-		if (login.getEmail() == null || login.getPassword() == null) {
-			throw new ServletException("Please fill in username and password");
-		}
+        String jwtToken = "";
+        if (login.getEmail() == null || login.getPassword() == null) {
+            return JSONResponse.errorDefault(MessageCode.fill_username_password);
+        }
 
-		String email = login.getEmail();
-		String password = login.getPassword();
+        String email = login.getEmail();
+        String password = login.getPassword();
 
-		User user = userService.getUserByEmail(email);
+        User user = userService.getUserByEmail(email);
 
-		if (user == null) {
-			throw new ServletException("User email not found.");
-		}
+        if (user == null) {
+            return JSONResponse.errorDefault(MessageCode.no_user_with_email);
+        }
 
-		String pwd = user.getPassword();
+        String pwd = user.getPassword();
 
-		if (!password.equals(pwd)) {
-			throw new ServletException("Invalid login. Please check your email and password.");
-		}
+        if (!password.equals(pwd)) {
+            return JSONResponse.errorDefault(MessageCode.invalid_login);
+        }
 
-		if (userService.getUserByEmail(email).getRoles().contains(Role.BLOCKED)) {
-			throw new ServletException("Blocked account.");
-		}
+        if (userService.getUserByEmail(email).getRoles().contains(Role.BLOCKED)) {
+            return JSONResponse.errorDefault(MessageCode.blocked_account);
+        }
 
-		if (userService.getUserByEmail(email).getRoles().contains(Role.VALIDATE_EMAIL)) {
-			throw new ServletException("Please validate your email address.");
-		}
+        if (userService.getUserByEmail(email).getRoles().contains(Role.VALIDATE_EMAIL)) {
+            return JSONResponse.errorDefault(MessageCode.not_valid_email);
+        }
 
-		Calendar date = Calendar.getInstance();
-		long t = date.getTimeInMillis();
-		// 30 min
-		Date endDate = new Date(t + (30 * 60000));
-		jwtToken = Jwts.builder().setSubject(email).claim("roles", user.getRoles()).setIssuedAt(new Date())
-				.setExpiration(endDate).signWith(SignatureAlgorithm.HS256, KeyFactory.jwtKey).compact();
-		KeyFactory.tokenMap.put(user.getId(), jwtToken);
-		System.out.println(KeyFactory.tokenMap);
-		return jwtToken;
+        Calendar date = Calendar.getInstance();
+        long t = date.getTimeInMillis();
+        // 30 min
+        Date endDate = new Date(t + (30 * 60000));
+        jwtToken = Jwts.builder().setSubject(email).claim("roles", user.getRoles()).setIssuedAt(new Date())
+                .setExpiration(endDate).signWith(SignatureAlgorithm.HS256, KeyFactory.jwtKey).compact();
+        KeyFactory.tokenMap.put(user.getId(), jwtToken);
+        System.out.println(KeyFactory.tokenMap);
+        return new JSONResponse<String>().successWithPayloadDefault(jwtToken);
 
-	}
+    }
 
-	@RequestMapping(method = RequestMethod.POST, value = "/secure/blockbyid/")
-	public void blockUserbyId(@RequestBody User u, @RequestHeader(value = "Authorization") String jwt)
-			throws ServletException {
-		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
-			int id = u.getId();
-			User user = userService.getUserById(id);
-			if (user == null) {
-				throw new ServletException("No user with that id");
-			}
-			Collection<Role> roles = user.getRoles();
-			roles.add(Role.BLOCKED);
-			user.setRoles(roles);
-			userService.addUser(user);
-			KeyFactory.tokenMap.remove(user.getId());
-		} else {
-			throw new ServletException("You are not authorized to do that");
-		}
+    @RequestMapping(method = RequestMethod.POST, value = "/secure/blockbyid/")
+    public JSONResponse blockUserbyId(@RequestBody User u, @RequestHeader(value = "Authorization") String jwt) {
+        if (JwtMyHelper.getIfJWTAdmin(jwt)) {
+            int id = u.getId();
+            User user = userService.getUserById(id);
+            if (user == null) {
+                return JSONResponse.errorDefault(MessageCode.no_user_with_id);
+            }
+            Collection<Role> roles = user.getRoles();
+            roles.add(Role.BLOCKED);
+            user.setRoles(roles);
+            userService.addUser(user);
+            KeyFactory.tokenMap.remove(user.getId());
+        } else {
+            return JSONResponse.errorDefault(MessageCode.not_authorized);
+        }
+        return JSONResponse.successNoPayloadDefault();
+    }
 
-	}
+    @RequestMapping(method = RequestMethod.POST, value = "/secure/unblockbyid/")
+    public JSONResponse unblockUserbyId(@RequestBody User u, @RequestHeader(value = "Authorization") String jwt) {
+        if (JwtMyHelper.getIfJWTAdmin(jwt)) {
+            int id = u.getId();
+            User user = userService.getUserById(id);
+            if (user == null) {
+                return JSONResponse.errorDefault(MessageCode.no_user_with_id);
+            }
+            Collection<Role> roles = user.getRoles();
+            roles.remove(Role.BLOCKED);
+            user.setRoles(roles);
+            userService.addUser(user);
+            KeyFactory.tokenMap.remove(user.getId());
+        } else {
+            return JSONResponse.errorDefault(MessageCode.not_authorized);
+        }
+        return JSONResponse.successNoPayloadDefault();
+    }
 
-	@RequestMapping(method = RequestMethod.POST, value = "/secure/unblockbyid/")
-	public void unblockUserbyId(@RequestBody User u, @RequestHeader(value = "Authorization") String jwt)
-			throws ServletException {
-		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
-			int id = u.getId();
-			User user = userService.getUserById(id);
-			if (user == null) {
-				throw new ServletException("No user with that id");
-			}
-			Collection<Role> roles = user.getRoles();
-			roles.remove(Role.BLOCKED);
-			user.setRoles(roles);
-			userService.addUser(user);
-			KeyFactory.tokenMap.remove(user.getId());
-		} else {
-			throw new ServletException("You are not authorized to do that");
-		}
+    @RequestMapping(method = RequestMethod.GET, value = "/secure/resetalltokens/")
+    public JSONResponse resetAllTokens(@RequestHeader(value = "Authorization") String jwt) {
+        if (JwtMyHelper.getIfJWTAdmin(jwt)) {
+            KeyFactory.tokenMap = new HashMap<Integer, String>();
+        } else {
+            return JSONResponse.errorDefault(MessageCode.not_authorized);
+        }
+        return JSONResponse.successNoPayloadDefault();
+    }
 
-	}
+    @RequestMapping(method = RequestMethod.POST, value = "/secure/resettokenforid/")
+    public JSONResponse resetTokenbyId(@RequestBody User u, @RequestHeader(value = "Authorization") String jwt) {
+        if (JwtMyHelper.getIfJWTAdmin(jwt)) {
+            int id = u.getId();
+            User user = userService.getUserById(id);
+            if (user == null) {
+                return JSONResponse.errorDefault(MessageCode.no_user_with_id);
+            }
+            KeyFactory.tokenMap.remove(id);
+        } else {
+            return JSONResponse.errorDefault(MessageCode.not_authorized);
+        }
+        return JSONResponse.successNoPayloadDefault();
+    }
 
-	@RequestMapping(method = RequestMethod.GET, value = "/secure/resetalltokens/")
-	public void resetAllTokens(@RequestHeader(value = "Authorization") String jwt) throws ServletException {
-		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
-			KeyFactory.tokenMap = new HashMap<Integer, String>();
-		} else {
-			throw new ServletException("You are not authorized to do that");
-		}
+    //TODO remove this
+    @RequestMapping(method = RequestMethod.POST, value = "/makeidadmin/")
+    public JSONResponse makeidadmin(@RequestBody User u) {
 
-	}
-
-	@RequestMapping(method = RequestMethod.POST, value = "/secure/resettokenforid/")
-	public void resetTokenbyId(@RequestBody User u, @RequestHeader(value = "Authorization") String jwt)
-			throws ServletException {
-		if (JwtMyHelper.getIfJWTAdmin(jwt)) {
-			int id = u.getId();
-			User user = userService.getUserById(id);
-			if (user == null) {
-				throw new ServletException("No user with that id");
-			}
-			KeyFactory.tokenMap.remove(id);
-		} else {
-			throw new ServletException("You are not authorized to do that");
-		}
-
-	}
-
-	//TODO remove this
-	@RequestMapping(method = RequestMethod.POST, value = "/makeidadmin/")
-	public void makeidadmin(@RequestBody User u) throws ServletException {
-
-		int id = u.getId();
-		User user = userService.getUserById(id);
-		if (user == null) {
-			throw new ServletException("No user with that id");
-		} else {
-			Collection<Role> newRoles = user.getRoles();
-			newRoles.add(Role.ADMIN);
-		user.setRoles(newRoles);
-		userService.addUser(user);
-		}
-
-	}
+        int id = u.getId();
+        User user = userService.getUserById(id);
+        if (user == null) {
+            return JSONResponse.errorDefault(MessageCode.no_user_with_id);
+        }
+        Collection<Role> newRoles = user.getRoles();
+        newRoles.add(Role.ADMIN);
+        user.setRoles(newRoles);
+        userService.addUser(user);
+        return JSONResponse.successNoPayloadDefault();
+    }
 
 }

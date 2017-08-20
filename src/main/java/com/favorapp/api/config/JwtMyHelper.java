@@ -10,7 +10,7 @@ import io.jsonwebtoken.Jwts;
 
 public class JwtMyHelper {
 
-	public static ArrayList<String> getJWTRoles(String jwt) throws ServletException {
+	public static ArrayList<String> getJWTRoles(String jwt) {
 		if (KeyFactory.checkKeyValidity(jwt)) {
 			jwt = jwt.replace("Bearer ", "");
 			Claims claims = Jwts.parser().setSigningKey(KeyFactory.jwtKey).parseClaimsJws(jwt).getBody();
@@ -29,7 +29,7 @@ public class JwtMyHelper {
 		return null;
 	}
 
-	public static boolean getIfJWTUser(String jwt) throws ServletException {
+	public static boolean getIfJWTUser(String jwt)  {
 		ArrayList<String> roleList = getJWTRoles(jwt);
 		if (roleList.contains("USER")) {
 			return true;
@@ -38,7 +38,7 @@ public class JwtMyHelper {
 		}
 	}
 
-	public static boolean getIfJWTAdmin(String jwt) throws ServletException {
+	public static boolean getIfJWTAdmin(String jwt)  {
 		ArrayList<String> roleList = getJWTRoles(jwt);
 		if (roleList.contains("ADMIN")) {
 			return true;
