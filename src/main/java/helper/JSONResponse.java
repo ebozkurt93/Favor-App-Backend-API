@@ -43,9 +43,18 @@ public class JSONResponse<T> {
     private static final int count = 0;
     private static final int maxTries = 5;
 
-    public static JSONResponse errorDefault(MessageCode error) {
+    public static JSONResponse errorDefault(String error) {
         try {
             return new JSONResponse<Null>(false, null, new JSONResponseError(new MessageParamsService().getMessageWithCodes(error, LanguageCode.en)));
+        } catch (Exception ex) {
+            JSONResponseError err = new JSONResponseError("Unknown Error");
+            return new JSONResponse<Null>(false, null, err);
+        }
+    }
+
+    public static JSONResponse errorDefault(int error_code, String error) {
+        try {
+            return new JSONResponse<Null>(false, null, new JSONResponseError(error_code, new MessageParamsService().getMessageWithCodes(error, LanguageCode.en)));
         } catch (Exception ex) {
             JSONResponseError err = new JSONResponseError("Unknown Error");
             return new JSONResponse<Null>(false, null, err);

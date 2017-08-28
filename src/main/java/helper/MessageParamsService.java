@@ -10,7 +10,7 @@ public class MessageParamsService {
     private MessageParamsRepository messageParamsRepository;
 
 
-    public String getMessageWithCodes(MessageCode messageCode, LanguageCode languageCode) {
+    public String getMessageWithCodes(String messageCode, LanguageCode languageCode) {
         return messageParamsRepository.findMessageParamsByMessageCodeAndLanguageCode(messageCode, languageCode).getMessage();
     }
 

@@ -1,7 +1,6 @@
 package helper;
 
 
-import org.hibernate.annotations.Table;
 
 import javax.persistence.*;
 @Entity(name = "message_params")
