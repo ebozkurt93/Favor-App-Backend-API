@@ -20,7 +20,7 @@ public class JSONResponse<T> {
     private T payload;
     @JsonFormat
     @Nullable
-    private String error;
+    private JSONResponseError error;
 
     public JSONResponse() {
         this.created_time = new Date();
@@ -32,54 +32,23 @@ public class JSONResponse<T> {
         this.created_time = new Date();
     }
 
-    private JSONResponse(boolean success, T payload, String error) {
+    private JSONResponse(boolean success, T payload, JSONResponseError error) {
         this.success = success;
         this.payload = payload;
         this.error = error;
         this.created_time = new Date();
     }
-/*
-    public boolean isSuccess() {
-        return success;
-    }
 
-    public void setSuccess(boolean success) {
-        this.success = success;
-    }
-
-    public Date getCreated_time() {
-        return created_time;
-    }
-
-    public void setCreated_time(Date created_time) {
-        this.created_time = created_time;
-    }
-
-    public T getPayload() {
-        return payload;
-    }
-
-    public void setPayload(T payload) {
-        this.payload = payload;
-    }
-
-    public String getError() {
-        return error;
-    }
-
-    public void setError(String error) {
-        this.error = error;
-    }
-*/
 
     private static final int count = 0;
     private static final int maxTries = 5;
 
     public static JSONResponse errorDefault(MessageCode error) {
         try {
-            return new JSONResponse<Null>(false, null, (String) new MessageParamsService().getMessageWithCodes(error, LanguageCode.en));
+            return new JSONResponse<Null>(false, null, new JSONResponseError(new MessageParamsService().getMessageWithCodes(error, LanguageCode.en)));
         } catch (Exception ex) {
-            return new JSONResponse<Null>(false, null, "Unknown Error");
+            JSONResponseError err = new JSONResponseError("Unknown Error");
+            return new JSONResponse<Null>(false, null, err);
         }
     }
 
@@ -87,25 +56,25 @@ public class JSONResponse<T> {
 
         int c = count;
 
-        while (true)
-
+        while (true) {
             try {
                 return new JSONResponse<Null>(true, (Null) null);
             } catch (Exception ex) {
                 if (++c == maxTries) throw ex;
             }
+        }
     }
 
     public JSONResponse<T> successWithPayloadDefault(T payload) {
         int c = count;
 
-        while (true)
-
+        while (true) {
             try {
                 return new JSONResponse<T>(true, payload);
             } catch (Exception ex) {
                 if (++c == maxTries) throw ex;
             }
+        }
     }
 
 }
