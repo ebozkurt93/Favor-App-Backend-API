@@ -1,4 +1,4 @@
-package helper;
+package com.favorapp.api.helper;
 
 public enum LanguageCode {
 

@@ -1,10 +1,8 @@
-package helper;
-
-import java.lang.reflect.Field;
+package com.favorapp.api.helper;
 
 public final class MessageCode {
 
-    //region Messages Commonly Sent To Client
+    //region MessageParams Commonly Sent To Client
     public static final String ERROR = "ERROR";
     public static final String ALREADY_VALIDATED_ACCOUNT = "ALREADY_VALIDATED_ACCOUNT";
     public static final String EMAIL_ALREADY_IN_USE = "EMAIL_ALREADY_IN_USE";
@@ -14,7 +12,7 @@ public final class MessageCode {
     public static final String EMAIL_NOT_VALIDATED = "EMAIL_NOT_VALIDATED";
     //endregion
 
-    //region Other(Internal) Messages
+    //region Other(Internal) MessageParams
     public static final String NOT_AUTHORIZED = "NOT_AUTHORIZED";
     public static final String NO_USER_WITH_ID = "NO_USER_WITH_ID";
     public static final String NO_USER_WITH_EMAIL = "NO_USER_WITH_EMAIL";

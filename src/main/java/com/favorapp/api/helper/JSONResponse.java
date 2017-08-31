@@ -1,12 +1,11 @@
-package helper;
+package com.favorapp.api.helper;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sun.istack.internal.Nullable;
-import com.sun.org.apache.xerces.internal.impl.dv.xs.DateTimeDV;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import javax.validation.constraints.Null;
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
@@ -39,22 +38,24 @@ public class JSONResponse<T> {
         this.created_time = new Date();
     }
 
-
+    @Autowired
+    MessageParamsService messageParamsService;
     private static final int count = 0;
     private static final int maxTries = 5;
 
-    public static JSONResponse errorDefault(String error) {
+    public JSONResponse errorDefault(String error) {
+
         try {
-            return new JSONResponse<Null>(false, null, new JSONResponseError(new MessageParamsService().getMessageWithCodes(error, LanguageCode.en)));
+            return new JSONResponse<Null>(false, null, new JSONResponseError( messageParamsService.getMessageValue(error, LanguageCode.en)));
         } catch (Exception ex) {
             JSONResponseError err = new JSONResponseError("Unknown Error");
             return new JSONResponse<Null>(false, null, err);
         }
     }
 
-    public static JSONResponse errorDefault(int error_code, String error) {
+    public JSONResponse errorDefault(int error_code, String error) {
         try {
-            return new JSONResponse<Null>(false, null, new JSONResponseError(error_code, new MessageParamsService().getMessageWithCodes(error, LanguageCode.en)));
+            return new JSONResponse<Null>(false, null, new JSONResponseError(error_code, messageParamsService.getMessageValue(error, LanguageCode.en)));
         } catch (Exception ex) {
             JSONResponseError err = new JSONResponseError("Unknown Error");
             return new JSONResponse<Null>(false, null, err);

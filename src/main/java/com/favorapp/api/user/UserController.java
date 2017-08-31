@@ -7,11 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 
 
-import helper.JSONResponse;
-import helper.MessageCode;
+import com.favorapp.api.helper.JSONResponse;
+import com.favorapp.api.helper.MessageCode;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.mail.MailException;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,7 +58,7 @@ public class UserController {
         User user = userService.getUserByEmail(email);
         Collection<Role> roles = user.getRoles();
         if (!roles.contains(Role.VALIDATE_EMAIL)) {
-            return JSONResponse.errorDefault(MessageCode.ALREADY_VALIDATED_ACCOUNT);
+            return new JSONResponse().errorDefault(MessageCode.ALREADY_VALIDATED_ACCOUNT);
         }
         roles.remove(Role.VALIDATE_EMAIL);
 
@@ -74,7 +72,7 @@ public class UserController {
         // check if email is valid
         String email = u.getEmail();
         if (!userService.isValidEmailAddress(email)) {
-            return JSONResponse.errorDefault(MessageCode.EMAIL_ADDRESS_DOESNT_FIT_TO_REGEX);
+            return new JSONResponse().errorDefault(MessageCode.EMAIL_ADDRESS_DOESNT_FIT_TO_REGEX);
         }
         // check if email is used
         else if (!userService.checkIfEmailUsed(email)) {
@@ -114,7 +112,7 @@ public class UserController {
 			 * TODO Auto-generated catch block e1.printStackTrace(); }
 			 */
         } else
-            return JSONResponse.errorDefault(MessageCode.EMAIL_ALREADY_IN_USE);
+            return new JSONResponse().errorDefault(MessageCode.EMAIL_ALREADY_IN_USE);
     }
 
     @RequestMapping(value = "/secure/all")
@@ -122,7 +120,7 @@ public class UserController {
         if (JwtMyHelper.getIfJWTAdmin(jwt) && KeyFactory.checkKeyValidity(jwt)) {
             return new JSONResponse<List<User>>().successWithPayloadDefault(userService.getAllUsers());
         } else {
-            return JSONResponse.errorDefault(MessageCode.ERROR);
+            return new JSONResponse().errorDefault(MessageCode.ERROR);
         }
     }
 
@@ -132,11 +130,11 @@ public class UserController {
             int id = u.getId();
             User user = userService.getUserById(id);
             if (user == null) {
-                return JSONResponse.errorDefault(MessageCode.NO_USER_WITH_ID);
+                return new JSONResponse().errorDefault(MessageCode.NO_USER_WITH_ID);
             }
             return new JSONResponse<User>().successWithPayloadDefault(user);
         } else {
-            return JSONResponse.errorDefault(MessageCode.NOT_AUTHORIZED);
+            return new JSONResponse().errorDefault(MessageCode.NOT_AUTHORIZED);
         }
 
     }
@@ -147,11 +145,11 @@ public class UserController {
             String email = u.getEmail();
             User user = userService.getUserByEmail(email);
             if (user == null) {
-                return JSONResponse.errorDefault(MessageCode.NO_USER_WITH_EMAIL);
+                return new JSONResponse().errorDefault(MessageCode.NO_USER_WITH_EMAIL);
             }
             return new JSONResponse<User>().successWithPayloadDefault(user);
         } else {
-            return JSONResponse.errorDefault(MessageCode.NOT_AUTHORIZED);
+            return new JSONResponse().errorDefault(MessageCode.NOT_AUTHORIZED);
         }
 
     }
@@ -161,7 +159,7 @@ public class UserController {
 
         String jwtToken = "";
         if (login.getEmail() == null || login.getPassword() == null) {
-            return JSONResponse.errorDefault(MessageCode.FILL_USERNAME_PASSWORD);
+            return new JSONResponse().errorDefault(MessageCode.FILL_USERNAME_PASSWORD);
         }
 
         String email = login.getEmail();
@@ -170,21 +168,21 @@ public class UserController {
         User user = userService.getUserByEmail(email);
 
         if (user == null) {
-            return JSONResponse.errorDefault(MessageCode.NO_USER_WITH_EMAIL);
+            return new JSONResponse().errorDefault(MessageCode.NO_USER_WITH_EMAIL);
         }
 
         String pwd = user.getPassword();
 
         if (!password.equals(pwd)) {
-            return JSONResponse.errorDefault(MessageCode.INVALID_LOGIN);
+            return new JSONResponse().errorDefault(MessageCode.INVALID_LOGIN);
         }
 
         if (userService.getUserByEmail(email).getRoles().contains(Role.BLOCKED)) {
-            return JSONResponse.errorDefault(MessageCode.BLOCKED_ACCOUNT);
+            return new JSONResponse().errorDefault(MessageCode.BLOCKED_ACCOUNT);
         }
 
         if (userService.getUserByEmail(email).getRoles().contains(Role.VALIDATE_EMAIL)) {
-            return JSONResponse.errorDefault(MessageCode.EMAIL_NOT_VALIDATED);
+            return new JSONResponse().errorDefault(MessageCode.EMAIL_NOT_VALIDATED);
         }
 
         Calendar date = Calendar.getInstance();
@@ -205,7 +203,7 @@ public class UserController {
             int id = u.getId();
             User user = userService.getUserById(id);
             if (user == null) {
-                return JSONResponse.errorDefault(MessageCode.NO_USER_WITH_ID);
+                return new JSONResponse().errorDefault(MessageCode.NO_USER_WITH_ID);
             }
             Collection<Role> roles = user.getRoles();
             roles.add(Role.BLOCKED);
@@ -213,7 +211,7 @@ public class UserController {
             userService.addUser(user);
             KeyFactory.tokenMap.remove(user.getId());
         } else {
-            return JSONResponse.errorDefault(MessageCode.NOT_AUTHORIZED);
+            return new JSONResponse().errorDefault(MessageCode.NOT_AUTHORIZED);
         }
         return JSONResponse.successNoPayloadDefault();
     }
@@ -224,7 +222,7 @@ public class UserController {
             int id = u.getId();
             User user = userService.getUserById(id);
             if (user == null) {
-                return JSONResponse.errorDefault(MessageCode.NO_USER_WITH_ID);
+                return new JSONResponse().errorDefault(MessageCode.NO_USER_WITH_ID);
             }
             Collection<Role> roles = user.getRoles();
             roles.remove(Role.BLOCKED);
@@ -232,7 +230,7 @@ public class UserController {
             userService.addUser(user);
             KeyFactory.tokenMap.remove(user.getId());
         } else {
-            return JSONResponse.errorDefault(MessageCode.NOT_AUTHORIZED);
+            return new JSONResponse().errorDefault(MessageCode.NOT_AUTHORIZED);
         }
         return JSONResponse.successNoPayloadDefault();
     }
@@ -242,7 +240,7 @@ public class UserController {
         if (JwtMyHelper.getIfJWTAdmin(jwt)) {
             KeyFactory.tokenMap = new HashMap<Integer, String>();
         } else {
-            return JSONResponse.errorDefault(MessageCode.NOT_AUTHORIZED);
+            return new JSONResponse().errorDefault(MessageCode.NOT_AUTHORIZED);
         }
         return JSONResponse.successNoPayloadDefault();
     }
@@ -253,11 +251,11 @@ public class UserController {
             int id = u.getId();
             User user = userService.getUserById(id);
             if (user == null) {
-                return JSONResponse.errorDefault(MessageCode.NO_USER_WITH_ID);
+                return new JSONResponse().errorDefault(MessageCode.NO_USER_WITH_ID);
             }
             KeyFactory.tokenMap.remove(id);
         } else {
-            return JSONResponse.errorDefault(MessageCode.NOT_AUTHORIZED);
+            return new JSONResponse().errorDefault(MessageCode.NOT_AUTHORIZED);
         }
         return JSONResponse.successNoPayloadDefault();
     }
@@ -269,7 +267,7 @@ public class UserController {
         int id = u.getId();
         User user = userService.getUserById(id);
         if (user == null) {
-            return JSONResponse.errorDefault(MessageCode.NO_USER_WITH_ID);
+            return new JSONResponse().errorDefault(MessageCode.NO_USER_WITH_ID);
         }
         Collection<Role> newRoles = user.getRoles();
         newRoles.add(Role.ADMIN);
