@@ -1,17 +1,9 @@
 package com.favorapp.api.user;
 
-import java.util.List;
-
-import javax.servlet.ServletException;
-
-import com.favorapp.api.helper.JSONResponse;
-import com.favorapp.api.helper.MessageCode;
+import com.favorapp.api.helper.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.favorapp.api.config.JwtMyHelper;
 
 @RestController
 @RequestMapping(path = "/demo/")
@@ -20,9 +12,19 @@ public class DemoController {
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private MessageParamsService messageParamsService;
+
 	@RequestMapping(value = "test")
-	public JSONResponse test () {
-		return new JSONResponse().errorDefault(MessageCode.ERROR);
+	public String test () {
+		//return new JSONResponseHelper().errorDefault(MessageCode.ERROR);
+		return messageParamsService.getMessageValue(MessageCode.ERROR, LanguageCode.en);
+	}
+
+	@RequestMapping(value = "test1")
+	public JSONResponse test1 () {
+		return new JSONResponse(messageParamsService).errorDefault(MessageCode.ERROR);
+		//return messageParamsService.getMessageValue(MessageCode.ERROR, LanguageCode.en);
 	}
 	/*
 	@RequestMapping(value = "/secure/all")

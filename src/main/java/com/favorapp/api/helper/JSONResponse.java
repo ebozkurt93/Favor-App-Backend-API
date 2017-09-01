@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.sun.istack.internal.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Controller;
 
 import javax.validation.constraints.Null;
 import java.util.Date;
@@ -25,28 +27,35 @@ public class JSONResponse<T> {
         this.created_time = new Date();
     }
 
-    private JSONResponse(boolean success, T payload) {
+    public JSONResponse(boolean success, T payload) {
         this.success = success;
         this.payload = payload;
         this.created_time = new Date();
     }
 
-    private JSONResponse(boolean success, T payload, JSONResponseError error) {
+    public JSONResponse(boolean success, T payload, JSONResponseError error) {
         this.success = success;
         this.payload = payload;
         this.error = error;
         this.created_time = new Date();
     }
 
-    @Autowired
-    MessageParamsService messageParamsService;
+
+    public JSONResponse(MessageParamsService messageParamsService) {
+        this.created_time = new Date();
+        this.messageParamsService = messageParamsService;
+    }
+
+    private MessageParamsService messageParamsService;
+
+
     private static final int count = 0;
     private static final int maxTries = 5;
 
     public JSONResponse errorDefault(String error) {
 
         try {
-            return new JSONResponse<Null>(false, null, new JSONResponseError( messageParamsService.getMessageValue(error, LanguageCode.en)));
+            return new JSONResponse<Null>(false, null, new JSONResponseError(messageParamsService.getMessageValue(error, LanguageCode.en)));
         } catch (Exception ex) {
             JSONResponseError err = new JSONResponseError("Unknown Error");
             return new JSONResponse<Null>(false, null, err);
