@@ -2,10 +2,8 @@ package com.favorapp.api.helper;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.sun.istack.internal.Nullable;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Controller;
 
 import javax.validation.constraints.Null;
 import java.util.Date;
@@ -15,7 +13,8 @@ public class JSONResponse<T> {
     @JsonFormat
     private boolean success;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private Date created_time;
+    @JsonProperty("created_time")
+    private Date createdTime;
     @JsonFormat
     @Nullable
     private T payload;
@@ -24,25 +23,25 @@ public class JSONResponse<T> {
     private JSONResponseError error;
 
     public JSONResponse() {
-        this.created_time = new Date();
+        this.createdTime = new Date();
     }
 
     public JSONResponse(boolean success, T payload) {
         this.success = success;
         this.payload = payload;
-        this.created_time = new Date();
+        this.createdTime = new Date();
     }
 
     public JSONResponse(boolean success, T payload, JSONResponseError error) {
         this.success = success;
         this.payload = payload;
         this.error = error;
-        this.created_time = new Date();
+        this.createdTime = new Date();
     }
 
 
     public JSONResponse(MessageParamsService messageParamsService) {
-        this.created_time = new Date();
+        this.createdTime = new Date();
         this.messageParamsService = messageParamsService;
     }
 
