@@ -1,10 +1,7 @@
 package com.favorapp.api.user;
 
 import java.awt.image.BufferedImage;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Date;
-import java.util.EnumSet;
+import java.util.*;
 
 import javax.persistence.Column;
 import javax.persistence.ElementCollection;
@@ -111,7 +108,7 @@ public class User {
     }
 
     public void setEmail(String email) {
-        this.email = email == null ? null : email.trim();
+        this.email = email == null ? null : email.toLowerCase(Locale.ENGLISH).trim();
     }
 
     public String getPassword() {
