@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-
 import com.favorapp.api.helper.JSONResponse;
 import com.favorapp.api.helper.MessageCode;
 import com.favorapp.api.helper.MessageParamsService;
@@ -172,7 +171,8 @@ public class UserController {
         User user = userService.getUserByEmail(email);
 
         if (user == null) {
-            return new JSONResponse(messageParamsService).errorDefault(MessageCode.NO_USER_WITH_EMAIL);
+            //sending invalid login because we don't want to give details to user
+            return new JSONResponse(messageParamsService).errorDefault(MessageCode.INVALID_LOGIN);
         }
 
         String pwd = user.getPassword();
@@ -199,6 +199,19 @@ public class UserController {
         System.out.println(KeyFactory.tokenMap);
         return new JSONResponse<String>().successWithPayloadDefault(jwtToken);
 
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/resetPassword/")
+    public JSONResponse resetPasswordWithMail(@RequestBody User user) {
+        User u = userService.getUserByEmail(user.getEmail());
+        //todo send email related to password reset to user
+        return JSONResponse.successNoPayloadDefault();
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/isemailregistered")
+    public JSONResponse isEmailRegistered(@RequestBody String email) {
+        String s = email.replace("\"", "");
+        return new JSONResponse<>().successWithPayloadDefault(userService.checkIfEmailUsed(s));
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/secure/blockbyid/")

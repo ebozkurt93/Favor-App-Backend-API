@@ -35,6 +35,12 @@ public class DemoController {
 		return new JSONResponse(messageParamsService).errorDefault(MessageCode.ERROR);
 		//return messageParamsService.getMessageValue(MessageCode.ERROR, LanguageCode.en);
 	}
+
+	@RequestMapping(value = "test2")
+	public JSONResponse test2 () {
+		return new JSONResponse().successWithPayloadDefault(userService.getUserById(1));
+		//return messageParamsService.getMessageValue(MessageCode.ERROR, LanguageCode.en);
+	}
 	/*
 	@RequestMapping(value = "/secure/all")
 	public List<User> getAllUsers(@RequestHeader(value = "Authorization") String jwt) throws ServletException {
