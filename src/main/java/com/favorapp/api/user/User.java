@@ -40,7 +40,7 @@ public class User {
     @Temporal(TemporalType.DATE)
     @JsonFormat(pattern = "yyyy-MM-dd")
     private Date registerDate;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 60)
     private String password;
 
     @ElementCollection(targetClass = Role.class)

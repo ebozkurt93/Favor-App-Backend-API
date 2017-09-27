@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import com.favorapp.api.config.security.PasswordEncoder;
 import com.favorapp.api.helper.JSONResponse;
 import com.favorapp.api.helper.MessageCode;
 import com.favorapp.api.helper.MessageParamsService;
@@ -84,7 +85,9 @@ public class UserController {
             u.getRoles().add(Role.USER);
             // TODO enable this later
             // u.getRoles().add(Role.VALIDATE_EMAIL);
-
+            PasswordEncoder passwordEncoder = new PasswordEncoder();
+            String encryptedPassword = passwordEncoder.encode(u.getPassword());
+            u.setPassword(encryptedPassword);
             userService.addUser(u);
 
             // get email validation token
@@ -175,9 +178,10 @@ public class UserController {
             return new JSONResponse(messageParamsService).errorDefault(MessageCode.INVALID_LOGIN);
         }
 
-        String pwd = user.getPassword();
+        String encodedPassword = user.getPassword();
+        PasswordEncoder passwordEncoder = new PasswordEncoder();
 
-        if (!password.equals(pwd)) {
+        if (!passwordEncoder.matches(password, encodedPassword)) {
             return new JSONResponse(messageParamsService).errorDefault(MessageCode.INVALID_LOGIN);
         }
 
