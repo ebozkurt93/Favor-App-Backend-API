@@ -60,7 +60,7 @@ public class UserController {
 
         String email = (String) claims.get("email_validation");
         User user = userService.getUserByEmail(email);
-        Collection<Role> roles = user.getRoles();
+        Collection<UserRoles> roles = user.getRoles();
         if (!roles.contains(Role.VALIDATE_EMAIL)) {
             return new JSONResponse(messageParamsService).errorDefault(MessageCode.ALREADY_VALIDATED_ACCOUNT);
         }
@@ -82,7 +82,7 @@ public class UserController {
         else if (!userService.checkIfEmailUsed(email)) {
             Date date = new Date();
             u.setRegisterDate(date);
-            u.getRoles().add(Role.USER);
+            u.getRoles().add(new UserRoles(u, Role.USER));
             // TODO enable this later
             // u.getRoles().add(Role.VALIDATE_EMAIL);
             PasswordEncoder passwordEncoder = new PasswordEncoder();
@@ -226,8 +226,8 @@ public class UserController {
             if (user == null) {
                 return new JSONResponse(messageParamsService).errorDefault(MessageCode.NO_USER_WITH_ID);
             }
-            Collection<Role> roles = user.getRoles();
-            roles.add(Role.BLOCKED);
+            Collection<UserRoles> roles = user.getRoles();
+            roles.add(new UserRoles(user, Role.BLOCKED));
             user.setRoles(roles);
             userService.addUser(user);
             KeyFactory.tokenMap.remove(user.getId());
@@ -245,8 +245,8 @@ public class UserController {
             if (user == null) {
                 return new JSONResponse(messageParamsService).errorDefault(MessageCode.NO_USER_WITH_ID);
             }
-            Collection<Role> roles = user.getRoles();
-            roles.remove(Role.BLOCKED);
+            Collection<UserRoles> roles = user.getRoles();
+            roles.remove(new UserRoles(user, Role.BLOCKED));
             user.setRoles(roles);
             userService.addUser(user);
             KeyFactory.tokenMap.remove(user.getId());
@@ -290,8 +290,8 @@ public class UserController {
         if (user == null) {
             return new JSONResponse(messageParamsService).errorDefault(MessageCode.NO_USER_WITH_ID);
         }
-        Collection<Role> newRoles = user.getRoles();
-        newRoles.add(Role.ADMIN);
+        Collection<UserRoles> newRoles = user.getRoles();
+        newRoles.add(new UserRoles(user, Role.ADMIN));
         user.setRoles(newRoles);
         userService.addUser(user);
         return JSONResponse.successNoPayloadDefault();

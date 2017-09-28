@@ -20,6 +20,7 @@ import javax.persistence.TemporalType;
 
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 public class User {
@@ -43,11 +44,16 @@ public class User {
     @Column(nullable = false, length = 60)
     private String password;
 
+    /*
     @ElementCollection(targetClass = Role.class)
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "roles", nullable = false)
     @Enumerated(EnumType.STRING)
-    private Collection<Role> roles;
+    */
+    @JsonManagedReference
+    @OneToMany(cascade = javax.persistence.CascadeType.PERSIST)
+    @JoinColumn(name = "user_id")
+    private Collection<UserRoles> roles;
 
     //private String phoneNumber;
     // profile pic
@@ -55,7 +61,7 @@ public class User {
     // private Image profilePic;
     //password etc
     /*
-	 * private String address; private String
+     * private String address; private String
 	 * email;
 	 */
 
@@ -119,14 +125,14 @@ public class User {
         this.password = password;
     }
 
-    public Collection<Role> getRoles() {
+    public Collection<UserRoles> getRoles() {
         if (roles == null) {
-            roles = new ArrayList<Role>();
+            roles = new ArrayList<UserRoles>();
         }
         return roles;
     }
 
-    public void setRoles(Collection<Role> roles) {
+    public void setRoles(Collection<UserRoles> roles) {
         this.roles = roles;
     }
 
