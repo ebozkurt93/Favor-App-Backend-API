@@ -43,6 +43,11 @@ public class User {
     private Date registerDate;
     @Column(nullable = false, length = 60)
     private String password;
+    @Column(nullable = false)
+    private int points;
+    @Column(nullable = false)
+    private int activeEventCount;
+    private double rating;
 
     /*
     @ElementCollection(targetClass = Role.class)
@@ -136,5 +141,27 @@ public class User {
         this.roles = roles;
     }
 
+    public int getPoints() {
+        return points;
+    }
 
+    public void setPoints(int points) {
+        this.points = points;
+    }
+
+    public int getActiveEventCount() {
+        return activeEventCount;
+    }
+
+    public void setActiveEventCount(int activeEventCount) {
+        this.activeEventCount = activeEventCount;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
 }

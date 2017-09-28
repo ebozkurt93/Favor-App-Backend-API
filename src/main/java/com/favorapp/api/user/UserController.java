@@ -83,6 +83,11 @@ public class UserController {
             Date date = new Date();
             u.setRegisterDate(date);
             u.getRoles().add(new UserRoles(u, Role.USER));
+
+            //default parameters
+            u.setPoints(100);
+            u.setActiveEventCount(0);
+
             // TODO enable this later
             // u.getRoles().add(Role.VALIDATE_EMAIL);
             PasswordEncoder passwordEncoder = new PasswordEncoder();

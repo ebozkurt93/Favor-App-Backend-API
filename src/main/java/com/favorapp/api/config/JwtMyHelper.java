@@ -5,10 +5,23 @@ import java.util.ArrayList;
 import javax.servlet.ServletException;
 
 import com.favorapp.api.config.key.KeyFactory;
+import com.favorapp.api.user.User;
+import com.favorapp.api.user.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 public class JwtMyHelper {
+
+	private UserService userService;
+
+	public JwtMyHelper() {
+	}
+
+	public JwtMyHelper(UserService userService) {
+		this.userService = userService;
+	}
 
 	public static ArrayList<String> getJWTRoles(String jwt) {
 		if (KeyFactory.checkKeyValidity(jwt)) {
@@ -36,6 +49,12 @@ public class JwtMyHelper {
 		} else {
 			return false;
 		}
+	}
+
+	public User getUserFromJWT(String jwt) {
+		jwt = jwt.replace("Bearer ", "");
+		String email = Jwts.parser().setSigningKey(KeyFactory.jwtKey).parseClaimsJws(jwt).getBody().getSubject();
+		return userService.getUserByEmail(email);
 	}
 
 	public static boolean getIfJWTAdmin(String jwt)  {

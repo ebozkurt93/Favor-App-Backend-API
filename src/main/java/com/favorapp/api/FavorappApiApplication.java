@@ -22,6 +22,7 @@ public class FavorappApiApplication {
 		final FilterRegistrationBean registrationBean = new FilterRegistrationBean();
 		registrationBean.setFilter(new JwtFilter());
 		registrationBean.addUrlPatterns("/user/secure/*");
+		registrationBean.addUrlPatterns("/event/secure/*");
 		//registrationBean.addUrlPatterns("/demo/secure/*");
 
 		return registrationBean;

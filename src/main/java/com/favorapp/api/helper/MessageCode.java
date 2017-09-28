@@ -18,6 +18,7 @@ public final class MessageCode {
     public static final String NO_USER_WITH_EMAIL = "NO_USER_WITH_EMAIL";
     public static final String FILL_USERNAME_PASSWORD = "FILL_USERNAME_PASSWORD";
     public static final String EMAIL_ADDRESS_DOESNT_FIT_TO_REGEX = "EMAIL_ADDRESS_DOESNT_FIT_TO_REGEX";
+    public static final String NOT_ENOUGH_POINTS = "NOT_ENOUGH_POINTS";
     //endregion
 
 }
