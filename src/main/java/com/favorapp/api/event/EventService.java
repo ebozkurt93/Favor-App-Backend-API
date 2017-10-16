@@ -26,5 +26,17 @@ public class EventService {
         eventRepository.findAll().forEach(events::add);
         return events;
     }
+//todo add control for getting non active events only, events which still are doable as time etc
+    public ArrayList<Event> getAllEvents(double latitude, double longitude) {
+        ArrayList<Event> events = new ArrayList<Event>();
+        double latVal = 1;
+        double longVal = 1;
+        double latMax = latitude + latVal;
+        double latMin = latitude - latVal;
+        double longMax = longitude + longVal;
+        double longMin = longitude - longVal;
+        eventRepository.getAllByLatitudeGreaterThanAndLatitudeLessThanAndLongitudeGreaterThanAndLongitudeLessThan(latMax, latMin, longMax, longMin).forEach(events::add);
+        return events;
+    }
 
 }

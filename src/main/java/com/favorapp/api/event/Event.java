@@ -37,6 +37,9 @@ public class Event {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "creation_date", nullable = false)
     private Date creationDate;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @Column(name = "latest_start_date", nullable = false)
+    private Date latestStartDate;
     @Column(name = "start_date")
     private DateTime startDate;
     @Column(name = "end_date")
@@ -100,6 +103,14 @@ public class Event {
         this.points = points;
     }
 
+    public Event_Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Event_Category category) {
+        this.category = category;
+    }
+
     public double getLatitude() {
         return latitude;
     }
@@ -122,6 +133,14 @@ public class Event {
 
     public void setCreationDate(Date creationDate) {
         this.creationDate = creationDate;
+    }
+
+    public Date getLatestStartDate() {
+        return latestStartDate;
+    }
+
+    public void setLatestStartDate(Date latestStartDate) {
+        this.latestStartDate = latestStartDate;
     }
 
     public DateTime getStartDate() {
@@ -170,13 +189,5 @@ public class Event {
 
     public void setHelperRating(int helperRating) {
         this.helperRating = helperRating;
-    }
-
-    public Event_Category getCategory() {
-        return category;
-    }
-
-    public void setCategory(Event_Category category) {
-        this.category = category;
     }
 }

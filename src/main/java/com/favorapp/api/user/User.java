@@ -19,9 +19,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-
+import com.fasterxml.jackson.annotation.*;
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Entity
 public class User {
 

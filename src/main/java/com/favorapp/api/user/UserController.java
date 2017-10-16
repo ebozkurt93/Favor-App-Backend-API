@@ -6,10 +6,17 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.favorapp.api.config.security.PasswordEncoder;
 import com.favorapp.api.helper.JSONResponse;
 import com.favorapp.api.helper.MessageCode;
 import com.favorapp.api.helper.MessageParamsService;
+import com.favorapp.api.helper.partial_classes.UserMyAccount;
+import com.favorapp.api.helper.partial_classes.UserPublic;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.web.bind.annotation.*;
@@ -201,13 +208,24 @@ public class UserController {
         Calendar date = Calendar.getInstance();
         long t = date.getTimeInMillis();
         // 30 min
-        Date endDate = new Date(t + (30 * 60000));
+        //todo enable this back
+        //Date endDate = new Date(t + (30 * 60000));
+        Date endDate = new Date(t + (10000 * 30 * 60000));
+
         jwtToken = Jwts.builder().setSubject(email).claim("roles", user.getRoles()).setIssuedAt(new Date())
                 .setExpiration(endDate).signWith(SignatureAlgorithm.HS256, KeyFactory.jwtKey).compact();
         KeyFactory.tokenMap.put(user.getId(), jwtToken);
         System.out.println(KeyFactory.tokenMap);
         return new JSONResponse<String>().successWithPayloadDefault(jwtToken);
 
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/secure/getmyinfo")
+    public JSONResponse getCurrentUserInfo(@RequestHeader(value = "Authorization") String jwt) {
+        User user = new JwtMyHelper(userService).getUserFromJWT(jwt);
+        UserMyAccount userMyAccount = new UserMyAccount();
+        BeanUtils.copyProperties(user, userMyAccount);
+        return new JSONResponse<>().successWithPayloadDefault(userMyAccount);
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/resetPassword/")

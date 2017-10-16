@@ -10,6 +10,9 @@ public final class MessageCode {
     public static final String INVALID_LOGIN = "INVALID_LOGIN";
     public static final String BLOCKED_ACCOUNT = "BLOCKED_ACCOUNT";
     public static final String EMAIL_NOT_VALIDATED = "EMAIL_NOT_VALIDATED";
+    //already doing too many events, therefore can't create/do any other
+    public static final String ACTIVE_EVENT_COUNT = "ACTIVE_EVENT_COUNT";
+
     //endregion
 
     //region Other(Internal) MessageParams
