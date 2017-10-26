@@ -1,20 +1,20 @@
 package com.favorapp.api.demo;
 
-import com.fasterxml.jackson.annotation.*;
 import com.favorapp.api.config.JwtMyHelper;
+import com.favorapp.api.config.key.KeyFactory;
+import com.favorapp.api.config.security.PasswordEncoder;
 import com.favorapp.api.event.Event;
 import com.favorapp.api.event.EventController;
 import com.favorapp.api.event.EventService;
 import com.favorapp.api.event.Event_State;
 import com.favorapp.api.helper.*;
-import com.favorapp.api.helper.log.Log;
-import com.favorapp.api.helper.log.LogRepository;
 import com.favorapp.api.helper.log.LogService;
 import com.favorapp.api.helper.partial_classes.EventCreate;
+import com.favorapp.api.helper.partial_classes.UserEditProfile;
 import com.favorapp.api.user.*;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -37,6 +37,91 @@ public class DemoController {
 
     @Autowired
     private EventService eventService;
+
+
+    @RequestMapping(method = RequestMethod.POST, value = "/editprofile")
+    public JSONResponse editProfile(@RequestHeader(value = "Authorization") String jwt, UserEditProfile updatedInfo){
+        User user = new JwtMyHelper(userService).getUserFromJWT(jwt);
+        if(updatedInfo.getName() != null) {
+            user.setName(updatedInfo.getName());
+        }
+        if (updatedInfo.getLastname() != null) {
+            user.setLastname(updatedInfo.getLastname());
+        }
+        //todo add description
+        /*if (updatedInfo.getDescription() != null) {
+
+        }*/
+        if (updatedInfo.getEmail() != null && updatedInfo.getCurrentPassword() != null) {
+            PasswordEncoder passwordEncoder = new PasswordEncoder();
+            if (!passwordEncoder.matches(updatedInfo.getCurrentPassword(), user.getPassword())) {
+                return new JSONResponse(messageParamsService).errorDefault(MessageCode.WRONG_PASSWORD);
+            }
+            else {
+                //todo send an email to user before and after email address change
+                user.setEmail(updatedInfo.getEmail());
+            }
+        }
+        if(updatedInfo.getNewPassword() != null && updatedInfo.getCurrentPassword() != null) {
+            PasswordEncoder passwordEncoder = new PasswordEncoder();
+            if (!passwordEncoder.matches(updatedInfo.getCurrentPassword(), user.getPassword())) {
+                return new JSONResponse(messageParamsService).errorDefault(MessageCode.WRONG_PASSWORD);
+            }
+            String newPassword = passwordEncoder.encode(updatedInfo.getNewPassword());
+            user.setPassword(newPassword);
+            //todo send an email to user
+        }
+
+        return JSONResponse.successNoPayloadDefault();
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/login")
+    public JSONResponse login(@RequestBody User login) {
+
+        String jwtToken = "";
+        if (login.getEmail() == null || login.getPassword() == null) {
+            return new JSONResponse(messageParamsService).errorDefault(MessageCode.FILL_USERNAME_PASSWORD);
+        }
+
+        String email = login.getEmail();
+        String password = login.getPassword();
+
+        User user = userService.getUserByEmail(email);
+
+        if (user == null) {
+            //sending invalid login because we don't want to give details to user
+            return new JSONResponse(messageParamsService).errorDefault(MessageCode.INVALID_LOGIN);
+        }
+
+        String encodedPassword = user.getPassword();
+        PasswordEncoder passwordEncoder = new PasswordEncoder();
+
+        if (!passwordEncoder.matches(password, encodedPassword)) {
+            return new JSONResponse(messageParamsService).errorDefault(MessageCode.INVALID_LOGIN);
+        }
+
+        if (userService.getUserByEmail(email).getRoles().contains(Role.BLOCKED)) {
+            return new JSONResponse(messageParamsService).errorDefault(MessageCode.BLOCKED_ACCOUNT);
+        }
+
+        if (userService.getUserByEmail(email).getRoles().contains(Role.VALIDATE_EMAIL)) {
+            return new JSONResponse(messageParamsService).errorDefault(MessageCode.EMAIL_NOT_VALIDATED);
+        }
+
+        Calendar date = Calendar.getInstance();
+        long t = date.getTimeInMillis();
+        // 30 min
+        //todo enable this back
+        //Date endDate = new Date(t + (30 * 60000));
+        Date endDate = new Date(t + (10000 * 30 * 60000));
+
+        jwtToken = Jwts.builder().setSubject(email).claim("roles", user.getRoles()).setIssuedAt(new Date())
+                .setExpiration(endDate).signWith(SignatureAlgorithm.HS256, KeyFactory.jwtKey).compact();
+        KeyFactory.tokenMap.put(user.getId(), jwtToken);
+        System.out.println(KeyFactory.tokenMap);
+        return new JSONResponse<String>().successWithPayloadDefault(jwtToken);
+
+    }
 
     @RequestMapping(value = "test")
     public void test() {

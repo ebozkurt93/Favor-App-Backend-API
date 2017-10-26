@@ -61,28 +61,19 @@ public class EventController {
         return JSONResponse.successNoPayloadDefault();
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/getallevents/{latitude}/{longitude}")
+    @RequestMapping(method = RequestMethod.GET, value = "/secure/getallevents/{latitude}/{longitude}")
     public JSONResponse getAllEventsLatLong(@RequestHeader(value = "Authorization") String jwt, @PathVariable double latitude, @PathVariable double longitude) {
-        //todo add the use of jwt here, at least check if it is valid
-        return new JSONResponse<ArrayList<Event>>().successWithPayloadDefault(eventService.getAllEvents(latitude, longitude));
+        List<EventPublic> events = new ArrayList<>();
+        eventService.getAllEvents(latitude, longitude).forEach(event -> events.add(eventService.turnEventToEventPublic(event)));
+        return new JSONResponse<>().successWithPayloadDefault(events);
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "/getallevents")
-    public JSONResponse getAllEvents() {
-        //todo add the use of jwt here, at least check if it is valid
+    @RequestMapping(method = RequestMethod.GET, value = "/secure/getallevents")
+    public JSONResponse getAllEvents(@RequestHeader(value = "Authorization") String jwt) {
         List<EventPublic> events = new ArrayList<>();
-        eventService.getAllEvents().forEach(event -> {
-            EventPublic eventPublic = new EventPublic();
-            BeanUtils.copyProperties(event, eventPublic);
-            UserPublic creator = new UserPublic();
-            BeanUtils.copyProperties(event.getCreator(), creator);
-            eventPublic.setCreator(creator);
-
-            events.add(eventPublic);
-        });
-
-        //eventService.getAllEvents().forEach(event -> BeanUtils.copyProperties(event, UserPublic u = new UserPublic()));
+        eventService.getAllEvents().forEach(event -> events.add(eventService.turnEventToEventPublic(event)));
         return new JSONResponse<>().successWithPayloadDefault(events);
+
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/sendrequest")

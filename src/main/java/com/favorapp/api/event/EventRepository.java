@@ -10,5 +10,5 @@ public interface EventRepository extends CrudRepository<Event, Long> {
 
     Event getEventById(int id);
 
-    ArrayList<Event> getAllByLatitudeGreaterThanAndLatitudeLessThanAndLongitudeGreaterThanAndLongitudeLessThan(double latMax, double latMin, double longMax, double longMin);
+    ArrayList<Event> getAllByLatitudeGreaterThanEqualAndLatitudeLessThanEqualAndLongitudeGreaterThanEqualAndLongitudeLessThanEqual(double latMax, double latMin, double longMax, double longMin);
 }

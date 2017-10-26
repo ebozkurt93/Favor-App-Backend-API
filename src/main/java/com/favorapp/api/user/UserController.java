@@ -205,19 +205,8 @@ public class UserController {
             return new JSONResponse(messageParamsService).errorDefault(MessageCode.EMAIL_NOT_VALIDATED);
         }
 
-        Calendar date = Calendar.getInstance();
-        long t = date.getTimeInMillis();
-        // 30 min
-        //todo enable this back
-        //Date endDate = new Date(t + (30 * 60000));
-        Date endDate = new Date(t + (10000 * 30 * 60000));
-
-        jwtToken = Jwts.builder().setSubject(email).claim("roles", user.getRoles()).setIssuedAt(new Date())
-                .setExpiration(endDate).signWith(SignatureAlgorithm.HS256, KeyFactory.jwtKey).compact();
-        KeyFactory.tokenMap.put(user.getId(), jwtToken);
-        System.out.println(KeyFactory.tokenMap);
+        jwtToken = new JwtMyHelper(userService).createAccessToken(user);
         return new JSONResponse<String>().successWithPayloadDefault(jwtToken);
-
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/secure/getmyinfo")

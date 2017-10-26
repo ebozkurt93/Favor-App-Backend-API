@@ -12,6 +12,9 @@ public final class MessageCode {
     public static final String EMAIL_NOT_VALIDATED = "EMAIL_NOT_VALIDATED";
     //already doing too many events, therefore can't create/do any other
     public static final String ACTIVE_EVENT_COUNT = "ACTIVE_EVENT_COUNT";
+    //used in cases like changing profile information such as email address, password
+    public static final String WRONG_PASSWORD = "WRONG_PASSWORD";
+
 
     //endregion
 

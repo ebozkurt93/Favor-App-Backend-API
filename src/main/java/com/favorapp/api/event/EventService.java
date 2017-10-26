@@ -1,7 +1,10 @@
 package com.favorapp.api.event;
 
+import com.favorapp.api.helper.partial_classes.EventPublic;
+import com.favorapp.api.helper.partial_classes.UserPublic;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDateTime;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,8 +38,18 @@ public class EventService {
         double latMin = latitude - latVal;
         double longMax = longitude + longVal;
         double longMin = longitude - longVal;
-        eventRepository.getAllByLatitudeGreaterThanAndLatitudeLessThanAndLongitudeGreaterThanAndLongitudeLessThan(latMax, latMin, longMax, longMin).forEach(events::add);
+        eventRepository.getAllByLatitudeGreaterThanEqualAndLatitudeLessThanEqualAndLongitudeGreaterThanEqualAndLongitudeLessThanEqual(latMin, latMax, longMin, longMax).forEach(events::add);
         return events;
+    }
+
+    public EventPublic turnEventToEventPublic (Event event) {
+        EventPublic eventPublic = new EventPublic();
+        BeanUtils.copyProperties(event, eventPublic);
+        UserPublic creator = new UserPublic();
+        BeanUtils.copyProperties(event.getCreator(), creator);
+        eventPublic.setCreator(creator);
+
+        return eventPublic;
     }
 
 }
