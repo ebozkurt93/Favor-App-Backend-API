@@ -32,10 +32,14 @@ public class EventController {
     @Autowired
     private MessageParamsService messageParamsService;
 
+    @Autowired
+    private EventRequestService eventRequestService;
+
     @RequestMapping(method = RequestMethod.POST, value = "/secure/createevent")
     public JSONResponse createEvent(@RequestHeader(value = "Authorization") String jwt, @RequestBody EventCreate eventCreate) {
         User user = new JwtMyHelper(userService).getUserFromJWT(jwt);
         Event event = eventCreate.getEvent();
+        event.setCreationDate(new Date());
         event.setEventState(Event_State.TODO);
         event.setCreator(user);
         if (eventCreate.isNow()) {
@@ -68,22 +72,41 @@ public class EventController {
         return new JSONResponse<>().successWithPayloadDefault(events);
     }
 
+    /*
     @RequestMapping(method = RequestMethod.GET, value = "/secure/getallevents")
     public JSONResponse getAllEvents(@RequestHeader(value = "Authorization") String jwt) {
         List<EventPublic> events = new ArrayList<>();
         eventService.getAllEvents().forEach(event -> events.add(eventService.turnEventToEventPublic(event)));
         return new JSONResponse<>().successWithPayloadDefault(events);
-
     }
+    */
 
-    @RequestMapping(method = RequestMethod.GET, value = "/sendrequest")
-    public JSONResponse sendRequest(@RequestHeader(value = "Authorization") String jwt) {
-        User user = new JwtMyHelper().getUserFromJWT(jwt);
-        if (user.getActiveEventCount() < 3)/*also if user didnt send request to this event before*/ {
-            //todo something
+    @RequestMapping(method = RequestMethod.POST, value = "/secure/sendrequest")
+    public JSONResponse sendRequest(@RequestHeader(value = "Authorization") String jwt, @RequestBody Event clientEvent) {
+        User user = new JwtMyHelper(userService).getUserFromJWT(jwt);
+        if (user.getActiveEventCount() >= 3) {
+            return new JSONResponse(messageParamsService).errorDefault(MessageCode.ACTIVE_EVENT_COUNT);
+        }
+        Event event = eventService.getEventById(clientEvent.getId());
+        if (event == null) {
+            return new JSONResponse(messageParamsService).errorDefault(MessageCode.NO_EVENT_WITH_ID);
+        } else if (event.getLatestStartDate().before(new Date()))
+            return new JSONResponse(messageParamsService).errorDefault(MessageCode.EVENT_EXPIRED);
+        if (event.getCreator().getId() == user.getId()) {
+            return new JSONResponse(messageParamsService).errorDefault(MessageCode.OWN_EVENT);
+        }
+        boolean alreadySentRequest = false;
+        for (EventRequest er : event.getEventRequests()) {
+            if (er.getUser() == user) {
+                alreadySentRequest = true;
+            }
+            if (alreadySentRequest)
+                return new JSONResponse(messageParamsService).errorDefault(1, MessageCode.ALREADY_SENT_REQUEST);
         }
 
+        EventRequest eventRequest = new EventRequest(event, user, new Date());
+        eventRequestService.save(eventRequest);
 
-        return new JSONResponse<ArrayList<Event>>().successWithPayloadDefault(eventService.getAllEvents());
+        return JSONResponse.successNoPayloadDefault();
     }
 }

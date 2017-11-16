@@ -14,6 +14,7 @@ import com.favorapp.api.config.security.PasswordEncoder;
 import com.favorapp.api.helper.JSONResponse;
 import com.favorapp.api.helper.MessageCode;
 import com.favorapp.api.helper.MessageParamsService;
+import com.favorapp.api.helper.partial_classes.UserEditProfile;
 import com.favorapp.api.helper.partial_classes.UserMyAccount;
 import com.favorapp.api.helper.partial_classes.UserPublic;
 import org.springframework.beans.BeanUtils;
@@ -223,6 +224,45 @@ public class UserController {
         //todo send email related to password reset to user
         return JSONResponse.successNoPayloadDefault();
     }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/editprofile")
+    public JSONResponse editProfile(@RequestHeader(value = "Authorization") String jwt, @RequestBody UserEditProfile updatedInfo){
+        User user = new JwtMyHelper(userService).getUserFromJWT(jwt);
+        if(updatedInfo.getName() != null) {
+            user.setName(updatedInfo.getName());
+        }
+        if (updatedInfo.getLastname() != null) {
+            user.setLastname(updatedInfo.getLastname());
+            System.out.println(user.getLastname());
+        }
+        //todo add description
+        /*if (updatedInfo.getDescription() != null) {
+
+        }*/
+        if (updatedInfo.getEmail() != null && updatedInfo.getCurrentPassword() != null) {
+            PasswordEncoder passwordEncoder = new PasswordEncoder();
+            if (!passwordEncoder.matches(updatedInfo.getCurrentPassword(), user.getPassword())) {
+                return new JSONResponse(messageParamsService).errorDefault(MessageCode.WRONG_PASSWORD);
+            }
+            else {
+                //todo send an email to user before and after email address change
+                user.setEmail(updatedInfo.getEmail());
+            }
+        }
+        if(updatedInfo.getNewPassword() != null && updatedInfo.getCurrentPassword() != null) {
+            PasswordEncoder passwordEncoder = new PasswordEncoder();
+            if (!passwordEncoder.matches(updatedInfo.getCurrentPassword(), user.getPassword())) {
+                return new JSONResponse(messageParamsService).errorDefault(MessageCode.WRONG_PASSWORD);
+            }
+            String newPassword = passwordEncoder.encode(updatedInfo.getNewPassword());
+            user.setPassword(newPassword);
+            //todo send an email to user
+        }
+        userService.addUser(user);
+
+        return JSONResponse.successNoPayloadDefault();
+    }
+
 
     @RequestMapping(method = RequestMethod.POST, value = "/isemailregistered")
     public JSONResponse isEmailRegistered(@RequestBody String email) {

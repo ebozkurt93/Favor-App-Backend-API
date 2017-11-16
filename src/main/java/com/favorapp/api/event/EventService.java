@@ -19,8 +19,6 @@ public class EventService {
     private EventRepository eventRepository;
 
     public void save(Event event) {
-        event.setCreationDate(new Date());
-        System.out.println(event.getCreationDate().toString());
         eventRepository.save(event);
     }
 
@@ -29,7 +27,11 @@ public class EventService {
         eventRepository.findAll().forEach(events::add);
         return events;
     }
-//todo add control for getting non active events only, events which still are doable as time etc
+
+    public Event getEventById(int id) {
+        return eventRepository.getEventById(id);
+    }
+
     public ArrayList<Event> getAllEvents(double latitude, double longitude) {
         ArrayList<Event> events = new ArrayList<Event>();
         double latVal = 1;
@@ -38,7 +40,8 @@ public class EventService {
         double latMin = latitude - latVal;
         double longMax = longitude + longVal;
         double longMin = longitude - longVal;
-        eventRepository.getAllByLatitudeGreaterThanEqualAndLatitudeLessThanEqualAndLongitudeGreaterThanEqualAndLongitudeLessThanEqual(latMin, latMax, longMin, longMax).forEach(events::add);
+        events.addAll(eventRepository.getAllByLatitudeGreaterThanEqualAndLatitudeLessThanEqualAndLongitudeGreaterThanEqualAndLongitudeLessThanEqualAndLatestStartDateIsAfterAndStartDateIsNull(latMin, latMax, longMin, longMax, new Date()));
+        //eventRepository.findAll().forEach(events::add);
         return events;
     }
 

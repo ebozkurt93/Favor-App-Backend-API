@@ -1,12 +1,13 @@
 package com.favorapp.api.helper.partial_classes;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.favorapp.api.event.EventRequest;
 import com.favorapp.api.event.Event_Category;
-import com.favorapp.api.user.User;
 
+import java.util.Collection;
 import java.util.Date;
 
-public class EventPublic {
+public class EventPrivate {
 
     private int id;
     private UserPublic creator;
@@ -20,8 +21,10 @@ public class EventPublic {
     private Date creationDate;
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     private Date latestStartDate;
+    private Collection<EventRequestPrivate> eventRequests;
 
-    public EventPublic() {
+
+    public EventPrivate() {
     }
 
     public int getId() {
@@ -102,5 +105,13 @@ public class EventPublic {
 
     public void setLatestStartDate(Date latestStartDate) {
         this.latestStartDate = latestStartDate;
+    }
+
+    public Collection<EventRequestPrivate> getEventRequests() {
+        return eventRequests;
+    }
+
+    public void setEventRequests(Collection<EventRequestPrivate> eventRequests) {
+        this.eventRequests = eventRequests;
     }
 }

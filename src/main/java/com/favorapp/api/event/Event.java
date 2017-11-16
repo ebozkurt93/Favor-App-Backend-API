@@ -3,8 +3,6 @@ package com.favorapp.api.event;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.favorapp.api.user.User;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDateTime;
 
 import javax.persistence.*;
 import java.util.Collection;
@@ -40,10 +38,12 @@ public class Event {
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "latest_start_date", nullable = false)
     private Date latestStartDate;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "start_date")
-    private DateTime startDate;
+    private Date startDate;
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
     @Column(name = "end_date")
-    private DateTime endDate;
+    private Date endDate;
 
     @Column(name = "event_state", nullable = false)
     @Enumerated(EnumType.ORDINAL)
@@ -143,19 +143,19 @@ public class Event {
         this.latestStartDate = latestStartDate;
     }
 
-    public DateTime getStartDate() {
+    public Date getStartDate() {
         return startDate;
     }
 
-    public void setStartDate(DateTime startDate) {
+    public void setStartDate(Date startDate) {
         this.startDate = startDate;
     }
 
-    public DateTime getEndDate() {
+    public Date getEndDate() {
         return endDate;
     }
 
-    public void setEndDate(DateTime endDate) {
+    public void setEndDate(Date endDate) {
         this.endDate = endDate;
     }
 
