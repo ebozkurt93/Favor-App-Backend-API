@@ -33,6 +33,8 @@ public class User {
     private String lastname;
     @Column(nullable = false)
     private String email;
+    @Column(nullable = false, length = 100)
+    private String description;
     @Column(nullable = false)
     @Temporal(TemporalType.DATE)
     @JsonFormat(pattern = "yyyy-MM-dd")
@@ -162,5 +164,13 @@ public class User {
 
     public void setRating(double rating) {
         this.rating = rating;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

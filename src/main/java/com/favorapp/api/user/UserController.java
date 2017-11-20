@@ -225,7 +225,7 @@ public class UserController {
         return JSONResponse.successNoPayloadDefault();
     }
 
-    @RequestMapping(method = RequestMethod.POST, value = "/editprofile")
+    @RequestMapping(method = RequestMethod.POST, value = "/secure/editprofile")
     public JSONResponse editProfile(@RequestHeader(value = "Authorization") String jwt, @RequestBody UserEditProfile updatedInfo){
         User user = new JwtMyHelper(userService).getUserFromJWT(jwt);
         if(updatedInfo.getName() != null) {
@@ -235,10 +235,9 @@ public class UserController {
             user.setLastname(updatedInfo.getLastname());
             System.out.println(user.getLastname());
         }
-        //todo add description
-        /*if (updatedInfo.getDescription() != null) {
-
-        }*/
+        if (updatedInfo.getDescription() != null) {
+            user.setDescription(updatedInfo.getDescription());
+        }
         if (updatedInfo.getEmail() != null && updatedInfo.getCurrentPassword() != null) {
             PasswordEncoder passwordEncoder = new PasswordEncoder();
             if (!passwordEncoder.matches(updatedInfo.getCurrentPassword(), user.getPassword())) {

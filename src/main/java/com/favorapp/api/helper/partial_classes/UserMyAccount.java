@@ -9,6 +9,7 @@ public class UserMyAccount {
     private int points;
     private int activeEventCount;
     private double rating;
+    private String description;
 
     public UserMyAccount() {
     }
@@ -67,5 +68,13 @@ public class UserMyAccount {
 
     public void setRating(double rating) {
         this.rating = rating;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

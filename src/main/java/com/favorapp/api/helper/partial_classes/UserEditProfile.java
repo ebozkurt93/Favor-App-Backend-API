@@ -7,6 +7,7 @@ public class UserEditProfile {
     private String email;
     private String currentPassword;
     private String newPassword;
+    private String description;
 
     public UserEditProfile() {
     }
@@ -49,5 +50,13 @@ public class UserEditProfile {
 
     public void setNewPassword(String newPassword) {
         this.newPassword = newPassword;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
