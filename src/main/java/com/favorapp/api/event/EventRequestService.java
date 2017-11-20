@@ -5,11 +5,10 @@ import com.favorapp.api.helper.partial_classes.EventRequestPrivate;
 import com.favorapp.api.helper.partial_classes.UserPublic;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import java.util.Collection;
+import java.util.Date;
 
 @Service
 public class EventRequestService {
@@ -24,12 +23,15 @@ public class EventRequestService {
         eventRequestRepository.save(eventRequest);
     }
 
-    public Collection<EventRequest> getAllRequestsByEventId(int id) {
-        return eventRequestRepository.findAllByEventId(id);
+
+
+    public Collection<EventRequest> getAllRequestsToUsersEventsByUserId(int id) {
+        return eventRequestRepository.findAllByEventCreatorIdAndEventLatestStartDateAfterAndEventEventState(id, new Date(), Event_State.TODO);
     }
 
-    public Collection<EventRequest> getAllRequestsByUserId(int id) {
-        return eventRequestRepository.findAllByUserId(id);
+    public boolean isThereSuchRequest(int eventId, int userId){
+        if(eventRequestRepository.getByUserIdAndEventId(userId, eventId) != null) return true;
+        else return false;
     }
 
     public EventRequestPrivate turnEventRequestToEventRequestPrivate(EventRequest request) {
@@ -40,10 +42,6 @@ public class EventRequestService {
         BeanUtils.copyProperties(request.getUser(), userPublic);
         eventRequestPrivate.setEvent(eventPublic);
         eventRequestPrivate.setUser(userPublic);
-
-        /*UserPublic creator = new UserPublic();
-        BeanUtils.copyProperties(event.getCreator(), creator);
-        eventRequestPrivate.setCreator(creator);*/
         return eventRequestPrivate;
     }
 }

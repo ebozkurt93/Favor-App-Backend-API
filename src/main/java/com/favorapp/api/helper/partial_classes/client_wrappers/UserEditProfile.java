@@ -1,4 +1,4 @@
-package com.favorapp.api.helper.partial_classes;
+package com.favorapp.api.helper.partial_classes.client_wrappers;
 
 public class UserEditProfile {
 

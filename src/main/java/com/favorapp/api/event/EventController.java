@@ -4,16 +4,13 @@ import com.favorapp.api.config.JwtMyHelper;
 import com.favorapp.api.helper.JSONResponse;
 import com.favorapp.api.helper.MessageCode;
 import com.favorapp.api.helper.MessageParamsService;
-import com.favorapp.api.helper.partial_classes.EventCreate;
+import com.favorapp.api.helper.partial_classes.client_wrappers.EventCreate;
 import com.favorapp.api.helper.partial_classes.EventPublic;
-import com.favorapp.api.helper.partial_classes.UserPublic;
 import com.favorapp.api.user.User;
 import com.favorapp.api.user.UserService;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;

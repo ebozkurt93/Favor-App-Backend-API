@@ -32,6 +32,8 @@ public final class MessageCode {
     public static final String EMAIL_ADDRESS_DOESNT_FIT_TO_REGEX = "EMAIL_ADDRESS_DOESNT_FIT_TO_REGEX";
     public static final String NOT_ENOUGH_POINTS = "NOT_ENOUGH_POINTS";
     public static final String NO_EVENT_WITH_ID = "NO_EVENT_WITH_ID";
+    //there is no such event request, user is trying to do event with someone who didn't actually request it
+    public static final String NO_EVENT_REQUEST = "NO_EVENT_REQUEST";
 
     //endregion
 

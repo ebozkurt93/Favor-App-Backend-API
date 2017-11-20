@@ -1,22 +1,16 @@
 package com.favorapp.api.user;
 
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
-import com.fasterxml.jackson.annotation.*;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.favorapp.api.config.security.PasswordEncoder;
+import com.favorapp.api.event.EventRequest;
+import com.favorapp.api.event.EventRequestService;
 import com.favorapp.api.helper.JSONResponse;
 import com.favorapp.api.helper.MessageCode;
 import com.favorapp.api.helper.MessageParamsService;
-import com.favorapp.api.helper.partial_classes.UserEditProfile;
+import com.favorapp.api.helper.partial_classes.EventRequestPrivate;
+import com.favorapp.api.helper.partial_classes.client_wrappers.UserEditProfile;
 import com.favorapp.api.helper.partial_classes.UserMyAccount;
-import com.favorapp.api.helper.partial_classes.UserPublic;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
@@ -42,6 +36,9 @@ public class UserController {
 
     @Autowired
     private MessageParamsService messageParamsService;
+
+    @Autowired
+    private EventRequestService eventRequestService;
 
     @RequestMapping(method = RequestMethod.GET, value = "/hello")
     public String hello() {
@@ -260,6 +257,17 @@ public class UserController {
         userService.addUser(user);
 
         return JSONResponse.successNoPayloadDefault();
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/secure/getmyeventrequests")
+    public JSONResponse sendRequest(@RequestHeader(value = "Authorization") String jwt) {
+        User user = new JwtMyHelper(userService).getUserFromJWT(jwt);
+        Collection<EventRequest> requests = eventRequestService.getAllRequestsToUsersEventsByUserId(user.getId());
+        Collection<EventRequestPrivate> eventRequestPrivates = new ArrayList<>();
+        requests.forEach(request -> {
+            eventRequestPrivates.add(eventRequestService.turnEventRequestToEventRequestPrivate(request));
+        });
+        return new JSONResponse().successWithPayloadDefault(eventRequestPrivates);
     }
 
 

@@ -1,23 +1,15 @@
 package com.favorapp.api.demo;
 
 import com.favorapp.api.config.JwtMyHelper;
-import com.favorapp.api.config.key.KeyFactory;
-import com.favorapp.api.config.security.PasswordEncoder;
 import com.favorapp.api.event.*;
 import com.favorapp.api.helper.*;
 import com.favorapp.api.helper.log.LogService;
-import com.favorapp.api.helper.partial_classes.EventCreate;
-import com.favorapp.api.helper.partial_classes.EventRequestPrivate;
-import com.favorapp.api.helper.partial_classes.UserEditProfile;
-import com.favorapp.api.helper.partial_classes.UserMyAccount;
+import com.favorapp.api.helper.partial_classes.client_wrappers.EventRequestAccept;
 import com.favorapp.api.user.*;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.*;
+import java.util.Date;
 
 @RestController
 @RequestMapping(path = "/demo/")
@@ -42,15 +34,22 @@ public class DemoController {
     private EventRequestService eventRequestService;
 
 
-    @RequestMapping(method = RequestMethod.POST, value = "/secure/getmyeventrequests")
-    public JSONResponse sendRequest(@RequestHeader(value = "Authorization") String jwt) {
+    @RequestMapping(method = RequestMethod.POST, value = "/secure/accepteventrequest")
+    public JSONResponse acceptEventRequest(@RequestHeader(value = "Authorization") String jwt, @RequestBody EventRequestAccept eventRequestAccept) {
         User user = new JwtMyHelper(userService).getUserFromJWT(jwt);
-        Collection<EventRequest> requests = eventRequestService.getAllRequestsByUserId(user.getId());
-        Collection<EventRequestPrivate> eventRequestPrivates = new ArrayList<>();
-        requests.forEach(request -> {
-            eventRequestPrivates.add(eventRequestService.turnEventRequestToEventRequestPrivate(request));
-        });
-        return new JSONResponse().successWithPayloadDefault(eventRequestPrivates);
+        User requestingUser = userService.getUserById(eventRequestAccept.getUser().getId());
+        Event event = eventService.getEventById(eventRequestAccept.getEvent().getId());
+        if(event == null)
+            return new JSONResponse(messageParamsService).errorDefault(MessageCode.NO_EVENT_WITH_ID);
+        if (requestingUser == null)
+            return new JSONResponse(messageParamsService).errorDefault(MessageCode.NO_USER_WITH_ID);
+        if (!eventRequestService.isThereSuchRequest(event.getId(), requestingUser.getId()))
+            return new JSONResponse(messageParamsService).errorDefault(MessageCode.NO_EVENT_REQUEST);
+        if(!(event.getEventState() == Event_State.TODO && event.getLatestStartDate().after(new Date())))
+            return new JSONResponse(messageParamsService).errorDefault(MessageCode.EVENT_EXPIRED);
+
+        //todo accept request, open chat between both sides, change event state 
+        return JSONResponse.successNoPayloadDefault();
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/test")
