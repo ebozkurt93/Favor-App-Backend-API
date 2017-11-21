@@ -5,6 +5,7 @@ import java.util.*;
 import com.favorapp.api.config.security.PasswordEncoder;
 import com.favorapp.api.event.EventRequest;
 import com.favorapp.api.event.EventRequestService;
+import com.favorapp.api.event.EventService;
 import com.favorapp.api.helper.JSONResponse;
 import com.favorapp.api.helper.MessageCode;
 import com.favorapp.api.helper.MessageParamsService;
@@ -39,6 +40,9 @@ public class UserController {
 
     @Autowired
     private EventRequestService eventRequestService;
+
+    @Autowired
+    private EventService eventService;
 
     @RequestMapping(method = RequestMethod.GET, value = "/hello")
     public String hello() {
@@ -202,7 +206,7 @@ public class UserController {
         if (userService.getUserByEmail(email).getRoles().contains(Role.VALIDATE_EMAIL)) {
             return new JSONResponse(messageParamsService).errorDefault(MessageCode.EMAIL_NOT_VALIDATED);
         }
-
+        eventService.returnPointsFromExpiredEvents(user.getId(), userService);
         jwtToken = new JwtMyHelper(userService).createAccessToken(user);
         return new JSONResponse<String>().successWithPayloadDefault(jwtToken);
     }

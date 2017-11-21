@@ -15,4 +15,6 @@ public interface EventRepository extends CrudRepository<Event, Long> {
 
     ArrayList<Event> getAllByLatitudeGreaterThanEqualAndLatitudeLessThanEqualAndLongitudeGreaterThanEqualAndLongitudeLessThanEqualAndLatestStartDateIsAfterAndStartDateIsNull(double latMax, double latMin, double longMax, double longMin, Date latestStartDate);
 
+    ArrayList<Event> getAllByCreatorIdAndEventStateAndLatestStartDateIsBefore(int id, Event_State eventState, Date date);
+
 }

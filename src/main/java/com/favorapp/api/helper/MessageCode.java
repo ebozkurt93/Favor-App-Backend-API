@@ -34,6 +34,11 @@ public final class MessageCode {
     public static final String NO_EVENT_WITH_ID = "NO_EVENT_WITH_ID";
     //there is no such event request, user is trying to do event with someone who didn't actually request it
     public static final String NO_EVENT_REQUEST = "NO_EVENT_REQUEST";
+    //event is not suitable for sending a message, it is not in progress state
+    public static final String EVENT_NOT_SUITABLE = "EVENT_NOT_SUITABLE";
+    //message may be empty
+    public static final String INVALID_MESSAGE = "INVALID_MESSAGE";
+
 
     //endregion
 

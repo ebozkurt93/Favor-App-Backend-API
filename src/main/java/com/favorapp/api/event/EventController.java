@@ -84,7 +84,7 @@ public class EventController {
         if (user.getActiveEventCount() >= 3) {
             return new JSONResponse(messageParamsService).errorDefault(MessageCode.ACTIVE_EVENT_COUNT);
         }
-        Event event = eventService.getEventById(clientEvent.getId());
+        Event event = eventService.getEventByEventId(clientEvent.getId());
         if (event == null) {
             return new JSONResponse(messageParamsService).errorDefault(MessageCode.NO_EVENT_WITH_ID);
         } else if (event.getLatestStartDate().before(new Date()))

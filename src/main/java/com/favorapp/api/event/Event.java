@@ -2,6 +2,7 @@ package com.favorapp.api.event;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.favorapp.api.event.message.Message;
 import com.favorapp.api.user.User;
 
 import javax.persistence.*;
@@ -57,7 +58,11 @@ public class Event {
     private int creatorRating;
     private int helperRating;
 
-    //todo chat
+    //todo message
+    //@JsonManagedReference
+    @OneToMany(cascade = javax.persistence.CascadeType.PERSIST)
+    @JoinColumn(name = "event_id")
+    Collection<Message> messages;
 
 
     public Event() {
@@ -189,5 +194,13 @@ public class Event {
 
     public void setHelperRating(int helperRating) {
         this.helperRating = helperRating;
+    }
+
+    public Collection<Message> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(Collection<Message> messages) {
+        this.messages = messages;
     }
 }
