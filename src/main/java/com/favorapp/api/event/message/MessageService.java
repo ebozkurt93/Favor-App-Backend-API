@@ -1,5 +1,6 @@
 package com.favorapp.api.event.message;
 
+import com.favorapp.api.helper.partial_classes.MessagePrivate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -28,6 +29,17 @@ public class MessageService {
 
     public int getMessageCountForEvent(int eventId) {
         return messageRepository.countMessagesByEventId(eventId);
+    }
+
+    public MessagePrivate turnMessageToMessagePrivate(Message msg) {
+        MessagePrivate messagePrivate = new MessagePrivate();
+        messagePrivate.setContent(msg.getContent());
+        messagePrivate.setCreationDate(msg.getCreationDate());
+        messagePrivate.setEvent_id(msg.getEvent().getId());
+        messagePrivate.setId(msg.getId());
+        messagePrivate.setSender_id(msg.getSender().getId());
+        messagePrivate.setType(msg.getType());
+        return messagePrivate;
     }
 
 

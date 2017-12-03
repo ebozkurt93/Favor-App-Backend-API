@@ -87,7 +87,7 @@ public class EventController {
         Event event = eventService.getEventByEventId(clientEvent.getId());
         if (event == null) {
             return new JSONResponse(messageParamsService).errorDefault(MessageCode.NO_EVENT_WITH_ID);
-        } else if (event.getLatestStartDate().before(new Date()))
+        } else if (event.getLatestStartDate().before(new Date()) || event.getEventState() != Event_State.TODO)
             return new JSONResponse(messageParamsService).errorDefault(MessageCode.EVENT_EXPIRED);
         if (event.getCreator().getId() == user.getId()) {
             return new JSONResponse(messageParamsService).errorDefault(MessageCode.OWN_EVENT);

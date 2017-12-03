@@ -17,4 +17,6 @@ public interface EventRepository extends CrudRepository<Event, Long> {
 
     ArrayList<Event> getAllByCreatorIdAndEventStateAndLatestStartDateIsBefore(int id, Event_State eventState, Date date);
 
+    ArrayList<Event> getAllByCreatorIdOrHelperId(int creatorId, int helperId);
+
 }
