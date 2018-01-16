@@ -89,8 +89,14 @@ public class DemoController {
     @RequestMapping(method = RequestMethod.POST, value = "/secure/accepteventrequest")
     public JSONResponse acceptEventRequest(@RequestHeader(value = "Authorization") String jwt, @RequestBody EventRequestAccept eventRequestAccept) {
         User user = new JwtMyHelper(userService).getUserFromJWT(jwt);
-        User requestingUser = userService.getUserById(eventRequestAccept.getUser().getId());
-        Event event = eventService.getEventByEventId(eventRequestAccept.getEvent().getId());
+        System.out.println(eventRequestAccept.getRequestId()); //todo remove
+        EventRequest request = eventRequestService.getEventRequestById(eventRequestAccept.getRequestId());
+        if(user.getId() != request.getEvent().getCreator().getId()) {
+            return new JSONResponse(messageParamsService).errorDefault(MessageCode.ERROR);
+        }
+        //todo maybe in future add NO_EVENT_REQUEST
+        User requestingUser = request.getUser();//userService.getUserById(request.getUser().getRequestId());
+        Event event = request.getEvent();//eventService.getEventByEventId(request.getEvent().getRequestId());
         if (event == null)
             return new JSONResponse(messageParamsService).errorDefault(MessageCode.NO_EVENT_WITH_ID);
         if (requestingUser == null)
@@ -106,6 +112,7 @@ public class DemoController {
         userService.addUser(requestingUser);
         event.setEventState(Event_State.IN_PROGRESS);
         event.setStartDate(new Date());
+        event.setHelper(requestingUser);
         eventService.save(event);
         //todo somehow inform other side
         return JSONResponse.successNoPayloadDefault();

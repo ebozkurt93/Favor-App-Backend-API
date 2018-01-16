@@ -1,21 +1,16 @@
 package com.favorapp.api.helper.partial_classes.client_wrappers;
 
-import com.favorapp.api.event.Event;
-import com.favorapp.api.user.User;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class EventRequestAccept {
 
-    private Event event;
-    private User user;
+    @JsonProperty("request_id")
+    private int requestId;
 
     public EventRequestAccept() {
     }
 
-    public Event getEvent() {
-        return event;
-    }
-
-    public User getUser() {
-        return user;
+    public int getRequestId() {
+        return requestId;
     }
 }

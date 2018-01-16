@@ -263,6 +263,7 @@ public class UserController {
         return JSONResponse.successNoPayloadDefault();
     }
 
+    //returns all requests to the events which are created by me
     @RequestMapping(method = RequestMethod.POST, value = "/secure/getmyeventrequests")
     public JSONResponse sendRequest(@RequestHeader(value = "Authorization") String jwt) {
         User user = new JwtMyHelper(userService).getUserFromJWT(jwt);

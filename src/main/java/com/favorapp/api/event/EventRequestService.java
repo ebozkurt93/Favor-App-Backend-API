@@ -34,6 +34,10 @@ public class EventRequestService {
         else return false;
     }
 
+    public EventRequest getEventRequestById(int requestId) {
+        return eventRequestRepository.getById(requestId);
+    }
+
     public EventRequestPrivate turnEventRequestToEventRequestPrivate(EventRequest request) {
         EventRequestPrivate eventRequestPrivate = new EventRequestPrivate();
         BeanUtils.copyProperties(request, eventRequestPrivate);
