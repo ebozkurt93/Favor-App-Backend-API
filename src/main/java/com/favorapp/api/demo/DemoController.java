@@ -106,10 +106,10 @@ public class DemoController {
         if (!(event.getEventState() == Event_State.TODO && event.getLatestStartDate().after(new Date())))
             return new JSONResponse(messageParamsService).errorDefault(MessageCode.EVENT_EXPIRED);
 
-        user.setActiveEventCount(user.getActiveEventCount() + 1);
-        requestingUser.setActiveEventCount(user.getActiveEventCount() + 1);
-        userService.addUser(user);
-        userService.addUser(requestingUser);
+        //user.setActiveEventCount(user.getActiveEventCount() + 1); //user already has increased event count when s/he created event so don't increase
+        requestingUser.setActiveEventCount(requestingUser.getActiveEventCount() + 1);
+        //userService.addUser(user);
+        //userService.addUser(requestingUser);
         event.setEventState(Event_State.IN_PROGRESS);
         event.setStartDate(new Date());
         event.setHelper(requestingUser);
