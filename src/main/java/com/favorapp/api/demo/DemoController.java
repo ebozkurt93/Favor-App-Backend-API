@@ -44,11 +44,11 @@ public class DemoController {
     private MessageService messageService;
 
 
-    @RequestMapping(method = RequestMethod.POST, value = "/secure/getallactiveevents")
-    public JSONResponse getAllActiveEvents(@RequestHeader(value = "Authorization") String jwt) {
+    @RequestMapping(method = RequestMethod.POST, value = "/secure/getmyactiveevents")
+    public JSONResponse getMyActiveEvents(@RequestHeader(value = "Authorization") String jwt) {
         User user = new JwtMyHelper(userService).getUserFromJWT(jwt);
         ArrayList<EventPublic> events = new ArrayList<>();
-        eventService.getAllActiveEvents(user.getId()).forEach(event -> events.add(eventService.turnEventToEventPublic(event)));
+        eventService.getMyActiveEvents(user.getId()).forEach(event -> events.add(eventService.turnEventToEventPublic(event)));
         return new JSONResponse().successWithPayloadDefault(events);
     }
 
@@ -91,7 +91,7 @@ public class DemoController {
         User user = new JwtMyHelper(userService).getUserFromJWT(jwt);
         System.out.println(eventRequestAccept.getRequestId()); //todo remove
         EventRequest request = eventRequestService.getEventRequestById(eventRequestAccept.getRequestId());
-        if(user.getId() != request.getEvent().getCreator().getId()) {
+        if (user.getId() != request.getEvent().getCreator().getId()) {
             return new JSONResponse(messageParamsService).errorDefault(MessageCode.ERROR);
         }
         //todo maybe in future add NO_EVENT_REQUEST
@@ -147,9 +147,26 @@ public class DemoController {
         return JSONResponse.successNoPayloadDefault();
     }
 
+
     @RequestMapping(method = RequestMethod.POST, value = "/test")
     public JSONResponse sendRequest() {
         return new JSONResponse().successWithPayloadDefault(eventService.getEventByEventId(13));
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/secure/deleteevent")
+    public JSONResponse deleteEvent(@RequestHeader(value = "Authorization") String jwt, @RequestBody Event event) {
+        User user = new JwtMyHelper(userService).getUserFromJWT(jwt);
+        event = eventService.getEventByEventId(event.getId());
+        if (event.getCreator().getId() != user.getId() || !event.getEventState().equals(Event_State.TODO)) {
+            //event is not created by that user or event is not in a deletable state
+            return new JSONResponse(messageParamsService).errorDefault(MessageCode.ERROR);
+        }
+        user.setPoints(user.getPoints() + event.getPoints());
+        user.setActiveEventCount(user.getActiveEventCount() - 1);
+        event.setEventState(Event_State.DELETED);
+        userService.addUser(user);
+        eventService.save(event);
+        return JSONResponse.successNoPayloadDefault();
     }
 
 }

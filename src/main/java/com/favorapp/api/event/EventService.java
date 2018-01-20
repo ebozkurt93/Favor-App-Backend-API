@@ -50,7 +50,7 @@ public class EventService {
         double latMin = latitude - latVal;
         double longMax = longitude + longVal;
         double longMin = longitude - longVal;
-        events.addAll(eventRepository.getAllByLatitudeGreaterThanEqualAndLatitudeLessThanEqualAndLongitudeGreaterThanEqualAndLongitudeLessThanEqualAndLatestStartDateIsAfterAndStartDateIsNull(latMin, latMax, longMin, longMax, new Date()));
+        events.addAll(eventRepository.getAllByLatitudeGreaterThanEqualAndLatitudeLessThanEqualAndLongitudeGreaterThanEqualAndLongitudeLessThanEqualAndLatestStartDateIsAfterAndStartDateIsNullAndEventStateIsNot(latMin, latMax, longMin, longMax, new Date(), Event_State.DELETED));
         //eventRepository.findAll().forEach(events::add);
         return events;
     }
@@ -61,7 +61,11 @@ public class EventService {
         UserPublic creator = new UserPublic();
         BeanUtils.copyProperties(event.getCreator(), creator);
         eventPublic.setCreator(creator);
-
+        if (event.getHelper() != null) {
+            UserPublic helper = new UserPublic();
+            BeanUtils.copyProperties(event.getHelper(), helper);
+            eventPublic.setHelper(helper);
+        }
         return eventPublic;
     }
 
@@ -73,11 +77,11 @@ public class EventService {
         return false;
     }
 
-    public ArrayList<Event> getAllActiveEvents(int userId) {
+    public ArrayList<Event> getMyActiveEvents(int userId) {
         ArrayList<Event> events = new ArrayList<>();
         eventRepository.getAllByCreatorIdOrHelperId(userId, userId).forEach(event -> {
             if ((event.getCreator().getId() == userId) && ((event.getEventState() == Event_State.IN_PROGRESS || event.getEventState() == Event_State.IN_REVIEW)) || (event.getEventState() == Event_State.TODO && event.getLatestStartDate().after(new Date()))
-                    || ( event.getHelper()!= null &&((event.getHelper().getId() == userId) && (event.getEventState() == Event_State.IN_PROGRESS || event.getEventState() == Event_State.IN_REVIEW))))
+                    || (event.getHelper() != null && ((event.getHelper().getId() == userId) && (event.getEventState() == Event_State.IN_PROGRESS || event.getEventState() == Event_State.IN_REVIEW))))
                 events.add(event);
         });
         return events;
