@@ -86,4 +86,14 @@ public class EventService {
         });
         return events;
     }
+
+    public ArrayList<Event> getMyStartedEvents(int userId) {
+        ArrayList<Event> events = new ArrayList<>();
+        eventRepository.getAllByCreatorIdOrHelperId(userId, userId).forEach(event -> {
+            if (((event.getCreator().getId() == userId) && ((event.getEventState() == Event_State.IN_PROGRESS || event.getEventState() == Event_State.IN_REVIEW)))
+                    || (event.getHelper() != null && ((event.getHelper().getId() == userId) && (event.getEventState() == Event_State.IN_PROGRESS || event.getEventState() == Event_State.IN_REVIEW))))
+                events.add(event);
+        });
+        return events;
+    }
 }

@@ -169,4 +169,12 @@ public class DemoController {
         return JSONResponse.successNoPayloadDefault();
     }
 
+    @RequestMapping(method = RequestMethod.POST, value = "/secure/getmystartedevents")
+    public JSONResponse getMyStartedEvents (@RequestHeader(value = "Authorization") String jwt) {
+        User user = new JwtMyHelper(userService).getUserFromJWT(jwt);
+        ArrayList<EventPublic> events = new ArrayList<>();
+        eventService.getMyStartedEvents(user.getId()).forEach(event -> events.add(eventService.turnEventToEventPublic(event)));
+        return new JSONResponse().successWithPayloadDefault(events);
+    }
+
 }
